@@ -1,0 +1,592 @@
+{
+  "easy": [
+    {
+      "id": "E001",
+      "theme": "Kids and Pets",
+      "people": ["Emma", "Liam", "Sophia"],
+      "categories": [
+        { "name": "Pets", "items": ["Cat", "Dog", "Fish"] },
+        { "name": "Colors", "items": ["Red", "Blue", "Green"] }
+      ],
+      "solution": {
+        "Emma": { "Pets": "Cat", "Colors": "Red" },
+        "Liam": { "Pets": "Dog", "Colors": "Blue" },
+        "Sophia": { "Pets": "Fish", "Colors": "Green" }
+      },
+      "clues": [
+        "Emma's favorite color is red",
+        "The child with the fish loves green",
+        "Liam has the dog",
+        "Sophia does not have a cat"
+      ]
+    },
+    {
+      "id": "E002",
+      "theme": "Friends and Hobbies",
+      "people": ["Anna", "Ben", "Clara"],
+      "categories": [
+        { "name": "Hobbies", "items": ["Painting", "Reading", "Cooking"] },
+        { "name": "Drinks", "items": ["Tea", "Coffee", "Juice"] }
+      ],
+      "solution": {
+        "Anna": { "Hobbies": "Painting", "Drinks": "Tea" },
+        "Ben": { "Hobbies": "Reading", "Drinks": "Coffee" },
+        "Clara": { "Hobbies": "Cooking", "Drinks": "Juice" }
+      },
+      "clues": [
+        "Anna drinks tea",
+        "The reader drinks coffee",
+        "Clara loves working in the kitchen",
+        "Ben does not drink juice"
+      ]
+    },
+    {
+      "id": "E003",
+      "theme": "Kids and Sports",
+      "people": ["Jack", "Maya", "Zoe"],
+      "categories": [
+        { "name": "Sports", "items": ["Soccer", "Swimming", "Tennis"] },
+        { "name": "Snacks", "items": ["Apple", "Banana", "Orange"] }
+      ],
+      "solution": {
+        "Jack": { "Sports": "Soccer", "Snacks": "Banana" },
+        "Maya": { "Sports": "Swimming", "Snacks": "Apple" },
+        "Zoe": { "Sports": "Tennis", "Snacks": "Orange" }
+      },
+      "clues": [
+        "Maya loves water sports",
+        "The soccer player eats bananas",
+        "Zoe does not eat apples",
+        "Jack does not play tennis"
+      ]
+    },
+    {
+      "id": "E004",
+      "theme": "Animals and Homes",
+      "people": ["Leo", "Mia", "Noah"],
+      "categories": [
+        { "name": "Animals", "items": ["Rabbit", "Bird", "Turtle"] },
+        { "name": "Homes", "items": ["House", "Apartment", "Farm"] }
+      ],
+      "solution": {
+        "Leo": { "Animals": "Bird", "Homes": "Apartment" },
+        "Mia": { "Animals": "Rabbit", "Homes": "House" },
+        "Noah": { "Animals": "Turtle", "Homes": "Farm" }
+      },
+      "clues": [
+        "Leo lives in an apartment",
+        "The rabbit owner lives in a house",
+        "Mia lives in a house",
+        "The farm owner has a turtle"
+      ]
+    },
+    {
+      "id": "E005",
+      "theme": "Students and Subjects",
+      "people": ["Ava", "Cole", "Lily"],
+      "categories": [
+        { "name": "Subjects", "items": ["Math", "Art", "Science"] },
+        { "name": "Lunches", "items": ["Pizza", "Salad", "Sandwich"] }
+      ],
+      "solution": {
+        "Ava": { "Subjects": "Math", "Lunches": "Salad" },
+        "Cole": { "Subjects": "Art", "Lunches": "Pizza" },
+        "Lily": { "Subjects": "Science", "Lunches": "Sandwich" }
+      },
+      "clues": [
+        "The art student loves pizza",
+        "Ava eats salad for lunch",
+        "Lily does not study math",
+        "Cole does not eat a sandwich"
+      ]
+    },
+    {
+      "id": "E006",
+      "theme": "Friends and Music",
+      "people": ["Dan", "Eve", "Finn"],
+      "categories": [
+        { "name": "Instruments", "items": ["Guitar", "Piano", "Drums"] },
+        { "name": "Colors", "items": ["Yellow", "Purple", "Orange"] }
+      ],
+      "solution": {
+        "Dan": { "Instruments": "Guitar", "Colors": "Yellow" },
+        "Eve": { "Instruments": "Piano", "Colors": "Purple" },
+        "Finn": { "Instruments": "Drums", "Colors": "Orange" }
+      },
+      "clues": [
+        "Dan plays a string instrument",
+        "The pianist loves purple",
+        "Finn does not like yellow",
+        "Eve does not play drums"
+      ]
+    },
+    {
+      "id": "E007",
+      "theme": "Siblings and Pets",
+      "people": ["Grace", "Henry", "Isla"],
+      "categories": [
+        { "name": "Pets", "items": ["Hamster", "Goldfish", "Parrot"] },
+        { "name": "Seasons", "items": ["Spring", "Summer", "Winter"] }
+      ],
+      "solution": {
+        "Grace": { "Pets": "Parrot", "Seasons": "Summer" },
+        "Henry": { "Pets": "Hamster", "Seasons": "Spring" },
+        "Isla": { "Pets": "Goldfish", "Seasons": "Winter" }
+      },
+      "clues": [
+        "Grace prefers the hottest season",
+        "The hamster owner prefers spring",
+        "Isla does not have a parrot",
+        "Henry does not like winter"
+      ]
+    },
+    {
+      "id": "E008",
+      "theme": "Classmates and Food",
+      "people": ["Jake", "Kim", "Luke"],
+      "categories": [
+        { "name": "Foods", "items": ["Tacos", "Sushi", "Pasta"] },
+        { "name": "Drinks", "items": ["Milk", "Water", "Juice"] }
+      ],
+      "solution": {
+        "Jake": { "Foods": "Tacos", "Drinks": "Water" },
+        "Kim": { "Foods": "Sushi", "Drinks": "Juice" },
+        "Luke": { "Foods": "Pasta", "Drinks": "Milk" }
+      },
+      "clues": [
+        "Kim drinks juice with her meal",
+        "The pasta lover drinks milk",
+        "Jake does not drink juice",
+        "Jake eats tacos"
+      ]
+    },
+    {
+      "id": "E009",
+      "theme": "Kids and Colors",
+      "people": ["Mia", "Nick", "Olivia"],
+      "categories": [
+        { "name": "Colors", "items": ["Pink", "Blue", "Green"] },
+        { "name": "Toys", "items": ["Blocks", "Puzzle", "Ball"] }
+      ],
+      "solution": {
+        "Mia": { "Colors": "Pink", "Toys": "Puzzle" },
+        "Nick": { "Colors": "Blue", "Toys": "Ball" },
+        "Olivia": { "Colors": "Green", "Toys": "Blocks" }
+      },
+      "clues": [
+        "Nick loves the color of the sky",
+        "The puzzle lover likes pink",
+        "Olivia has the blocks",
+        "Mia does not have blocks"
+      ]
+    },
+    {
+      "id": "E010",
+      "theme": "Friends and Travel",
+      "people": ["Paul", "Quinn", "Rose"],
+      "categories": [
+        { "name": "Places", "items": ["Beach", "Mountains", "City"] },
+        { "name": "Transport", "items": ["Car", "Train", "Plane"] }
+      ],
+      "solution": {
+        "Paul": { "Places": "Beach", "Transport": "Car" },
+        "Quinn": { "Places": "Mountains", "Transport": "Train" },
+        "Rose": { "Places": "City", "Transport": "Plane" }
+      },
+      "clues": [
+        "Paul drives to his destination",
+        "The mountain visitor takes a train",
+        "Rose does not go to the beach",
+        "Quinn does not fly"
+      ]
+    }
+  ],
+  "medium": [
+    {
+      "id": "M001",
+      "theme": "Professionals and Cities",
+      "people": ["Alice", "Bob", "Carol", "Dave"],
+      "categories": [
+        { "name": "Jobs", "items": ["Teacher", "Doctor", "Chef", "Artist"] },
+        { "name": "Cities", "items": ["NYC", "LA", "Chicago", "Miami"] }
+      ],
+      "solution": {
+        "Alice": { "Jobs": "Doctor", "Cities": "NYC" },
+        "Bob": { "Jobs": "Chef", "Cities": "LA" },
+        "Carol": { "Jobs": "Teacher", "Cities": "Chicago" },
+        "Dave": { "Jobs": "Artist", "Cities": "Miami" }
+      },
+      "clues": [
+        "Alice works in a hospital in the biggest city",
+        "Bob cooks professionally on the west coast",
+        "Carol educates children in the windy city",
+        "Dave creates art in the sunshine state city",
+        "The doctor does not live in LA",
+        "The artist does not live in Chicago"
+      ]
+    },
+    {
+      "id": "M002",
+      "theme": "Friends Hobbies Cities",
+      "people": ["Emma", "Frank", "Grace", "Henry"],
+      "categories": [
+        { "name": "Hobbies", "items": ["Hiking", "Gaming", "Cooking", "Reading"] },
+        { "name": "Cities", "items": ["Boston", "Denver", "Seattle", "Austin"] },
+        { "name": "Drinks", "items": ["Coffee", "Tea", "Juice", "Water"] }
+      ],
+      "solution": {
+        "Emma": { "Hobbies": "Hiking", "Cities": "Seattle", "Drinks": "Water" },
+        "Frank": { "Hobbies": "Gaming", "Cities": "Austin", "Drinks": "Juice" },
+        "Grace": { "Hobbies": "Cooking", "Cities": "Boston", "Drinks": "Tea" },
+        "Henry": { "Hobbies": "Reading", "Cities": "Denver", "Drinks": "Coffee" }
+      },
+      "clues": [
+        "Emma lives in the rainiest city",
+        "The gamer lives in Texas",
+        "Grace loves preparing meals",
+        "Henry drinks coffee every morning",
+        "The hiker only drinks water",
+        "The reader lives in Colorado"
+      ]
+    },
+    {
+      "id": "M003",
+      "theme": "Scientists and Discoveries",
+      "people": ["Ivan", "Julia", "Karl", "Laura"],
+      "categories": [
+        { "name": "Fields", "items": ["Physics", "Biology", "Chemistry", "Astronomy"] },
+        { "name": "Countries", "items": ["USA", "UK", "Germany", "France"] },
+        { "name": "Years", "items": ["1990", "1995", "2000", "2005"] }
+      ],
+      "solution": {
+        "Ivan": { "Fields": "Physics", "Countries": "USA", "Years": "2000" },
+        "Julia": { "Fields": "Biology", "Countries": "UK", "Years": "1995" },
+        "Karl": { "Fields": "Chemistry", "Countries": "Germany", "Years": "1990" },
+        "Laura": { "Fields": "Astronomy", "Countries": "France", "Years": "2005" }
+      },
+      "clues": [
+        "Ivan made his discovery in 2000",
+        "The biologist is from the UK",
+        "Karl works with chemicals",
+        "Laura studies stars and planets",
+        "The physics discovery was not in 1995",
+        "The most recent discovery was in France"
+      ]
+    },
+    {
+      "id": "M004",
+      "theme": "Athletes and Sports",
+      "people": ["Mike", "Nina", "Oscar", "Pam"],
+      "categories": [
+        { "name": "Sports", "items": ["Tennis", "Swimming", "Cycling", "Running"] },
+        { "name": "Countries", "items": ["USA", "Brazil", "Australia", "Canada"] },
+        { "name": "Medals", "items": ["Gold", "Silver", "Bronze", "None"] }
+      ],
+      "solution": {
+        "Mike": { "Sports": "Tennis", "Countries": "USA", "Medals": "Gold" },
+        "Nina": { "Sports": "Swimming", "Countries": "Brazil", "Medals": "Silver" },
+        "Oscar": { "Sports": "Cycling", "Countries": "Australia", "Medals": "Bronze" },
+        "Pam": { "Sports": "Running", "Countries": "Canada", "Medals": "None" }
+      },
+      "clues": [
+        "Mike won the highest honor in tennis",
+        "Nina represents South America",
+        "The cyclist is from the land down under",
+        "Pam did not win a medal",
+        "The swimmer did not win gold",
+        "The runner is from North America"
+      ]
+    },
+    {
+      "id": "M005",
+      "theme": "Chefs and Cuisines",
+      "people": ["Quinn", "Rita", "Sam", "Tara"],
+      "categories": [
+        { "name": "Cuisines", "items": ["Italian", "Japanese", "Mexican", "Indian"] },
+        { "name": "Restaurants", "items": ["Downtown", "Harbor", "Mall", "Airport"] },
+        { "name": "Specialties", "items": ["Pasta", "Sushi", "Tacos", "Curry"] }
+      ],
+      "solution": {
+        "Quinn": { "Cuisines": "Italian", "Restaurants": "Downtown", "Specialties": "Pasta" },
+        "Rita": { "Cuisines": "Japanese", "Restaurants": "Harbor", "Specialties": "Sushi" },
+        "Sam": { "Cuisines": "Mexican", "Restaurants": "Mall", "Specialties": "Tacos" },
+        "Tara": { "Cuisines": "Indian", "Restaurants": "Airport", "Specialties": "Curry" }
+      },
+      "clues": [
+        "Quinn works in the city center",
+        "Rita's restaurant overlooks the water",
+        "Sam works near the shops",
+        "The Indian chef works near travelers",
+        "The Italian chef makes pasta",
+        "The Japanese chef makes sushi"
+      ]
+    },
+    {
+      "id": "M006",
+      "theme": "Teachers and Subjects",
+      "people": ["Uma", "Vince", "Wendy", "Xavier"],
+      "categories": [
+        { "name": "Subjects", "items": ["Math", "History", "Science", "English"] },
+        { "name": "Schools", "items": ["Elementary", "Middle", "High", "College"] },
+        { "name": "Ages Taught", "items": ["6-8", "11-13", "14-17", "18-22"] }
+      ],
+      "solution": {
+        "Uma": { "Subjects": "Math", "Schools": "College", "Ages Taught": "18-22" },
+        "Vince": { "Subjects": "History", "Schools": "High", "Ages Taught": "14-17" },
+        "Wendy": { "Subjects": "Science", "Schools": "Middle", "Ages Taught": "11-13" },
+        "Xavier": { "Subjects": "English", "Schools": "Elementary", "Ages Taught": "6-8" }
+      },
+      "clues": [
+        "Uma teaches the oldest students",
+        "Vince teaches teenagers in high school",
+        "Wendy teaches middle schoolers",
+        "Xavier works with the youngest children",
+        "The math teacher works at college level",
+        "The English teacher works with young kids"
+      ]
+    },
+    {
+      "id": "M007",
+      "theme": "Artists and Styles",
+      "people": ["Yara", "Zack", "Amy", "Brian"],
+      "categories": [
+        { "name": "Styles", "items": ["Abstract", "Realist", "Surreal", "Impressionist"] },
+        { "name": "Mediums", "items": ["Oil", "Watercolor", "Digital", "Sculpture"] },
+        { "name": "Cities", "items": ["Paris", "Rome", "London", "Berlin"] }
+      ],
+      "solution": {
+        "Yara": { "Styles": "Abstract", "Mediums": "Digital", "Cities": "Berlin" },
+        "Zack": { "Styles": "Realist", "Mediums": "Oil", "Cities": "Rome" },
+        "Amy": { "Styles": "Surreal", "Mediums": "Watercolor", "Cities": "Paris" },
+        "Brian": { "Styles": "Impressionist", "Mediums": "Sculpture", "Cities": "London" }
+      },
+      "clues": [
+        "Yara creates digital abstract art",
+        "Zack uses oil paint for realistic works",
+        "Amy lives in the city of love",
+        "Brian works in the UK capital",
+        "The surrealist uses watercolor",
+        "The impressionist creates sculptures"
+      ]
+    },
+    {
+      "id": "M008",
+      "theme": "Travelers and Destinations",
+      "people": ["Carl", "Dana", "Eric", "Fiona"],
+      "categories": [
+        { "name": "Destinations", "items": ["Egypt", "Japan", "Peru", "Iceland"] },
+        { "name": "Activities", "items": ["Hiking", "Surfing", "Sightseeing", "Skiing"] },
+        { "name": "Months", "items": ["March", "June", "September", "December"] }
+      ],
+      "solution": {
+        "Carl": { "Destinations": "Egypt", "Activities": "Sightseeing", "Months": "March" },
+        "Dana": { "Destinations": "Japan", "Activities": "Surfing", "Months": "June" },
+        "Eric": { "Destinations": "Peru", "Activities": "Hiking", "Months": "September" },
+        "Fiona": { "Destinations": "Iceland", "Activities": "Skiing", "Months": "December" }
+      },
+      "clues": [
+        "Carl visits ancient pyramids in spring",
+        "Dana travels to Asia in summer",
+        "Eric hikes in South America in fall",
+        "Fiona skis in winter",
+        "The Egypt traveler goes sightseeing",
+        "The Iceland visitor goes in December"
+      ]
+    },
+    {
+      "id": "M009",
+      "theme": "Musicians and Genres",
+      "people": ["Glen", "Hana", "Ivan", "Julia"],
+      "categories": [
+        { "name": "Genres", "items": ["Jazz", "Classical", "Rock", "Pop"] },
+        { "name": "Instruments", "items": ["Piano", "Guitar", "Violin", "Drums"] },
+        { "name": "Cities", "items": ["New Orleans", "Vienna", "London", "Nashville"] }
+      ],
+      "solution": {
+        "Glen": { "Genres": "Jazz", "Instruments": "Piano", "Cities": "New Orleans" },
+        "Hana": { "Genres": "Classical", "Instruments": "Violin", "Cities": "Vienna" },
+        "Ivan": { "Genres": "Rock", "Instruments": "Guitar", "Cities": "London" },
+        "Julia": { "Genres": "Pop", "Instruments": "Drums", "Cities": "Nashville" }
+      },
+      "clues": [
+        "Glen plays jazz piano in Louisiana",
+        "Hana plays classical violin in Austria",
+        "Ivan rocks out in England",
+        "Julia plays pop music in Tennessee",
+        "The jazz musician plays piano",
+        "The rock musician plays guitar"
+      ]
+    },
+    {
+      "id": "M010",
+      "theme": "Friends and Careers",
+      "people": ["Kate", "Liam", "Mona", "Neil"],
+      "categories": [
+        { "name": "Careers", "items": ["Lawyer", "Engineer", "Writer", "Nurse"] },
+        { "name": "Hobbies", "items": ["Yoga", "Chess", "Gardening", "Photography"] },
+        { "name": "Pets", "items": ["Dog", "Cat", "Bird", "Fish"] }
+      ],
+      "solution": {
+        "Kate": { "Careers": "Lawyer", "Hobbies": "Yoga", "Pets": "Dog" },
+        "Liam": { "Careers": "Engineer", "Hobbies": "Chess", "Pets": "Fish" },
+        "Mona": { "Careers": "Writer", "Hobbies": "Gardening", "Pets": "Cat" },
+        "Neil": { "Careers": "Nurse", "Hobbies": "Photography", "Pets": "Bird" }
+      },
+      "clues": [
+        "Kate practices law and does yoga",
+        "Liam solves engineering problems and plays chess",
+        "Mona writes books and tends her garden",
+        "Neil cares for patients and photographs nature",
+        "The lawyer has a dog",
+        "The writer has a cat"
+      ]
+    }
+  ],
+  "hard": [
+    {
+      "id": "H001",
+      "theme": "Five Friends",
+      "people": ["Alex", "Beth", "Chris", "Dana", "Eve"],
+      "categories": [
+        { "name": "Jobs", "items": ["Pilot", "Chef", "Lawyer", "Doctor", "Artist"] },
+        { "name": "Cities", "items": ["Tokyo", "London", "Sydney", "Toronto", "Cairo"] },
+        { "name": "Hobbies", "items": ["Tennis", "Chess", "Painting", "Yoga", "Coding"] },
+        { "name": "Pets", "items": ["Dog", "Cat", "Bird", "Fish", "Rabbit"] }
+      ],
+      "solution": {
+        "Alex": { "Jobs": "Pilot", "Cities": "Tokyo", "Hobbies": "Tennis", "Pets": "Dog" },
+        "Beth": { "Jobs": "Chef", "Cities": "London", "Hobbies": "Painting", "Pets": "Cat" },
+        "Chris": { "Jobs": "Lawyer", "Cities": "Sydney", "Hobbies": "Chess", "Pets": "Fish" },
+        "Dana": { "Jobs": "Doctor", "Cities": "Toronto", "Hobbies": "Yoga", "Pets": "Bird" },
+        "Eve": { "Jobs": "Artist", "Cities": "Cairo", "Hobbies": "Coding", "Pets": "Rabbit" }
+      },
+      "clues": [
+        "Alex flies planes and lives in Japan",
+        "Beth cooks professionally in England",
+        "Chris practices law in Australia",
+        "Dana heals people in Canada",
+        "Eve creates art in Egypt",
+        "The pilot plays tennis on weekends",
+        "The chef loves to paint",
+        "The doctor practices yoga",
+        "The artist keeps a rabbit as a pet"
+      ]
+    },
+    {
+      "id": "H002",
+      "theme": "Five Scientists",
+      "people": ["Frank", "Gina", "Hank", "Iris", "Jake"],
+      "categories": [
+        { "name": "Fields", "items": ["Physics", "Biology", "Chemistry", "Math", "Astronomy"] },
+        { "name": "Universities", "items": ["Harvard", "Oxford", "MIT", "Stanford", "Cambridge"] },
+        { "name": "Awards", "items": ["Nobel", "Fields Medal", "Turing", "None", "Pulitzer"] },
+        { "name": "Years Active", "items": ["1980s", "1990s", "2000s", "2010s", "2020s"] }
+      ],
+      "solution": {
+        "Frank": { "Fields": "Physics", "Universities": "MIT", "Awards": "Nobel", "Years Active": "1990s" },
+        "Gina": { "Fields": "Biology", "Universities": "Harvard", "Awards": "Pulitzer", "Years Active": "2000s" },
+        "Hank": { "Fields": "Chemistry", "Universities": "Oxford", "Awards": "None", "Years Active": "1980s" },
+        "Iris": { "Fields": "Math", "Universities": "Cambridge", "Awards": "Fields Medal", "Years Active": "2010s" },
+        "Jake": { "Fields": "Astronomy", "Universities": "Stanford", "Awards": "Turing", "Years Active": "2020s" }
+      },
+      "clues": [
+        "Frank studies physics at MIT",
+        "Gina researches biology at Harvard",
+        "Hank studied chemistry in England",
+        "Iris solves mathematical problems at a British university",
+        "Jake explores space science at a California university",
+        "The physicist won a Nobel Prize",
+        "The biologist won a Pulitzer",
+        "The mathematician won a Fields Medal",
+        "The most recent scientist won a Turing Award"
+      ]
+    },
+    {
+      "id": "H003",
+      "theme": "Five Athletes",
+      "people": ["Kim", "Lars", "Mia", "Nick", "Opal"],
+      "categories": [
+        { "name": "Sports", "items": ["Marathon", "Swimming", "Cycling", "Boxing", "Gymnastics"] },
+        { "name": "Countries", "items": ["USA", "Norway", "China", "Mexico", "Australia"] },
+        { "name": "Coaches", "items": ["Rivera", "Smith", "Chen", "Johnson", "Patel"] },
+        { "name": "Records", "items": ["World", "Olympic", "National", "None", "Continental"] }
+      ],
+      "solution": {
+        "Kim": { "Sports": "Gymnastics", "Countries": "China", "Coaches": "Chen", "Records": "Olympic" },
+        "Lars": { "Sports": "Cycling", "Countries": "Norway", "Coaches": "Patel", "Records": "Continental" },
+        "Mia": { "Sports": "Marathon", "Countries": "USA", "Coaches": "Johnson", "Records": "World" },
+        "Nick": { "Sports": "Boxing", "Countries": "Mexico", "Coaches": "Rivera", "Records": "National" },
+        "Opal": { "Sports": "Swimming", "Countries": "Australia", "Coaches": "Smith", "Records": "None" }
+      },
+      "clues": [
+        "Kim performs gymnastics for China",
+        "Lars cycles for a Scandinavian nation",
+        "Mia holds the world marathon record",
+        "Nick boxes for a North American country",
+        "Opal swims for Australia",
+        "The gymnast is coached by Chen",
+        "The cyclist is coached by Patel",
+        "The marathon runner is coached by Johnson",
+        "The boxer holds a national record"
+      ]
+    },
+    {
+      "id": "H004",
+      "theme": "Five Chefs",
+      "people": ["Pete", "Quinn", "Rosa", "Stan", "Tina"],
+      "categories": [
+        { "name": "Cuisines", "items": ["French", "Thai", "Mexican", "Italian", "Indian"] },
+        { "name": "Cities", "items": ["Paris", "Bangkok", "Mexico City", "Rome", "Mumbai"] },
+        { "name": "Restaurants", "items": ["Stars", "Waves", "Garden", "Tower", "Palace"] },
+        { "name": "Signature Dishes", "items": ["Croissant", "Pad Thai", "Tacos", "Pizza", "Curry"] }
+      ],
+      "solution": {
+        "Pete": { "Cuisines": "French", "Cities": "Paris", "Restaurants": "Tower", "Signature Dishes": "Croissant" },
+        "Quinn": { "Cuisines": "Thai", "Cities": "Bangkok", "Restaurants": "Waves", "Signature Dishes": "Pad Thai" },
+        "Rosa": { "Cuisines": "Mexican", "Cities": "Mexico City", "Restaurants": "Garden", "Signature Dishes": "Tacos" },
+        "Stan": { "Cuisines": "Italian", "Cities": "Rome", "Restaurants": "Stars", "Signature Dishes": "Pizza" },
+        "Tina": { "Cuisines": "Indian", "Cities": "Mumbai", "Restaurants": "Palace", "Signature Dishes": "Curry" }
+      },
+      "clues": [
+        "Pete cooks French food in France",
+        "Quinn makes Thai food in Thailand",
+        "Rosa prepares Mexican food in Mexico",
+        "Stan creates Italian food in Italy",
+        "Tina crafts Indian food in India",
+        "The French chef works at the Tower",
+        "The Thai chef works at Waves",
+        "The Mexican chef works at Garden",
+        "The Indian chef works at Palace"
+      ]
+    },
+    {
+      "id": "H005",
+      "theme": "Five Explorers",
+      "people": ["Uma", "Vito", "Wren", "Xena", "Yale"],
+      "categories": [
+        { "name": "Regions", "items": ["Arctic", "Amazon", "Sahara", "Himalayas", "Pacific"] },
+        { "name": "Transport", "items": ["Dogsled", "Boat", "Camel", "Helicopter", "Submarine"] },
+        { "name": "Discoveries", "items": ["New Species", "Ruins", "Minerals", "Weather Patterns", "Shipwreck"] },
+        { "name": "Years", "items": ["2018", "2019", "2020", "2021", "2022"] }
+      ],
+      "solution": {
+        "Uma": { "Regions": "Arctic", "Transport": "Dogsled", "Discoveries": "Weather Patterns", "Years": "2018" },
+        "Vito": { "Regions": "Amazon", "Transport": "Boat", "Discoveries": "New Species", "Years": "2019" },
+        "Wren": { "Regions": "Sahara", "Transport": "Camel", "Discoveries": "Minerals", "Years": "2020" },
+        "Xena": { "Regions": "Himalayas", "Transport": "Helicopter", "Discoveries": "Ruins", "Years": "2021" },
+        "Yale": { "Regions": "Pacific", "Transport": "Submarine", "Discoveries": "Shipwreck", "Years": "2022" }
+      },
+      "clues": [
+        "Uma explored the Arctic by dogsled",
+        "Vito traveled the Amazon by boat",
+        "Wren crossed the Sahara by camel",
+        "Xena flew to the Himalayas",
+        "Yale dove into the Pacific by submarine",
+        "The Arctic explorer found weather patterns",
+        "The Amazon explorer found a new species",
+        "The Sahara explorer found minerals",
+        "The Pacific explorer found a shipwreck"
+      ]
+    }
+  ]
+}

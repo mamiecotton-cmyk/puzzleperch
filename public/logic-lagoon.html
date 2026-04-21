@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Logic Lagoon — PuzzlePerch</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F8FDFF;
+    --green: #8CC63F;
+    --green-dark: #66B527;
+    --green-soft: #F0FAE0;
+    --purple: #6B4BF6;
+    --purple-soft: #EDE8FF;
+    --purple-deep: #3B1FBF;
+    --coral: #FF6B6B;
+    --coral-soft: #FFF5F5;
+    --coral-bg: #FFF0CC;
+    --teal: #00B4D8;
+    --teal-light: #E0F7FF;
+    --gray: #F5F5F5;
+    --dark: #0D0D2B;
+    --line: #E0E0F0;
+    --shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --shadow-hover: 0 12px 32px rgba(0,0,0,0.14);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    font-family: 'Outfit', sans-serif;
+    color: var(--dark);
+    background: linear-gradient(180deg, var(--bg) 0%, #EAF8FF 100%);
+    min-height: 100%;
+    overflow-x: hidden;
+  }
+  body { padding-bottom: 40px; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+  a { color: inherit; text-decoration: none; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    padding: 12px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  .home-link { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; color: var(--purple); }
+  .home-link .brand { color: var(--dark); }
+  .topbar-right { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; }
+  .stat {
+    background: var(--gray); padding: 8px 14px; border-radius: 50px;
+    display: inline-flex; align-items: center; gap: 6px;
+    min-width: 80px; justify-content: center;
+  }
+  .stat.score { background: rgba(140,198,63,0.18); color: var(--green-dark); }
+  .stat.timer { background: rgba(0,180,216,0.15); color: var(--teal); }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 24px 18px; }
+
+  h1.page-title {
+    font-size: clamp(36px, 6vw, 54px);
+    font-weight: 900; color: var(--purple);
+    line-height: 1.05; letter-spacing: -1px;
+    margin-bottom: 6px; text-align: center;
+  }
+  .page-sub { text-align: center; font-size: 18px; font-weight: 800; color: var(--teal); margin-bottom: 24px; letter-spacing: 0.3px; }
+
+  .screen { display: none; animation: fadeIn 0.35s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px);} to { opacity:1; transform: none;} }
+
+  .chooser-intro {
+    text-align: center;
+    font-size: 16px; font-weight: 600; color: #355;
+    margin-bottom: 22px;
+  }
+  .diff-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 26px; }
+  .diff-card {
+    background: #fff;
+    border: 3px solid var(--line);
+    border-radius: 18px;
+    padding: 18px 20px;
+    text-align: left;
+    box-shadow: var(--shadow);
+    transition: all 0.18s ease;
+    display: flex; align-items: center; gap: 16px;
+    width: 100%;
+    min-height: 88px;
+  }
+  .diff-card .emoji { font-size: 40px; flex-shrink: 0; line-height: 1; }
+  .diff-card .body { flex: 1; }
+  .diff-card .label {
+    font-size: 20px; font-weight: 900; color: var(--dark);
+    margin-bottom: 4px;
+  }
+  .diff-card .meta { font-size: 14px; font-weight: 700; color: #6B6B7A; }
+  .diff-card .desc { font-size: 14px; font-weight: 600; color: #355; margin-top: 4px; }
+  .diff-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+  .diff-card.selected[data-d="easy"]   { border-color: var(--green); background: linear-gradient(135deg,#fff,#eef8da); }
+  .diff-card.selected[data-d="medium"] { border-color: var(--purple); background: linear-gradient(135deg,#fff,#f1edff); }
+  .diff-card.selected[data-d="hard"]   { border-color: var(--coral); background: linear-gradient(135deg,#fff,#ffeaea); }
+
+  .start-btn-wrap { text-align: center; margin-top: 10px; }
+  .btn-start {
+    background: linear-gradient(135deg, var(--teal), #0096b8);
+    color: #fff; font-weight: 900; font-size: 19px;
+    padding: 18px 44px; border-radius: 50px;
+    box-shadow: 0 8px 22px rgba(0,180,216,0.4);
+    transition: all 0.18s ease;
+    width: 100%; max-width: 360px;
+    min-height: 54px;
+  }
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(0,180,216,0.5); }
+  .btn-start:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .game-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px; gap: 10px; flex-wrap: wrap;
+  }
+  .puzzle-title {
+    font-size: 22px; font-weight: 900; color: var(--purple);
+    line-height: 1.1;
+  }
+  .puzzle-sub { font-size: 14px; font-weight: 700; color: var(--teal); margin-top: 2px; }
+
+  .grid-wrap {
+    background: #fff;
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .scroll-hint {
+    text-align: center; font-size: 14px; font-weight: 700;
+    color: var(--teal); margin-bottom: 14px;
+    display: none;
+  }
+  @media (max-width: 600px) { .scroll-hint { display: block; } }
+
+  .grid-wrap { overflow: auto; max-height: 70vh; }
+  table.grid {
+    border-collapse: collapse;
+    margin: 0 auto;
+    table-layout: fixed;
+  }
+  table.grid th, table.grid td {
+    border: 1px solid var(--line);
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+  }
+  table.grid .corner { background: #fff; border: none; }
+  table.grid th.axis-name {
+    background: var(--purple-soft);
+    color: var(--purple-deep);
+    font-weight: 800; font-size: 14px;
+    padding: 6px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border: 1px solid var(--line);
+  }
+  table.grid th.axis-name.row { writing-mode: vertical-rl; transform: rotate(180deg); min-width: 28px; }
+  table.grid th.col-item, table.grid th.row-item {
+    background: var(--green-soft);
+    color: var(--dark);
+    font-weight: 700; font-size: 14px;
+    padding: 6px 8px;
+    transition: background 0.2s ease;
+    min-width: 56px; min-height: 48px;
+  }
+  table.grid th.col-item { vertical-align: bottom; }
+  table.grid th.row-item { text-align: right; min-width: 96px; }
+  table.grid th.col-item.highlight, table.grid th.row-item.highlight { background: #DFF1B6; color: var(--purple-deep); font-weight: 800; }
+
+  table.grid td.cell.bdr-left, table.grid td.empty.bdr-left, table.grid th.col-item.bdr-left { border-left: 2px solid var(--purple); }
+  table.grid td.cell.bdr-top, table.grid td.empty.bdr-top, table.grid th.row-item.bdr-top { border-top: 2px solid var(--purple); }
+
+  table.grid td.cell {
+    width: 48px; height: 48px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 22px; font-weight: 900;
+    user-select: none;
+    transition: background 0.15s ease, transform 0.15s ease;
+    border: 1px solid var(--line);
+  }
+  table.grid td.empty { background: #F2F2F8; border: 1px solid var(--line); width: 48px; height: 48px; }
+  table.grid td.cell:hover { background: #F4FAFF; }
+  table.grid td.cell.no { color: var(--coral); }
+  table.grid td.cell.yes { color: var(--green-dark); background: #F4FBE5; }
+  table.grid td.cell.hint-no { color: var(--coral); background: var(--coral-bg); cursor: not-allowed; }
+  table.grid td.cell.auto-no { color: var(--coral); background: #FFF7F7; }
+  table.grid td.cell.auto-yes { color: var(--green-dark); background: #F4FBE5; }
+  table.grid td.cell.wrong { background: #FFD7D7; animation: cellShake 0.45s ease; }
+  table.grid td.cell.hl-row, table.grid td.cell.hl-col { box-shadow: inset 0 0 0 2px #FFD86E; }
+  @keyframes cellShake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    50% { transform: translateX(4px); }
+    75% { transform: translateX(-3px); }
+  }
+
+  .clues-section { margin-top: 8px; }
+  .clues-title {
+    font-size: 14px; font-weight: 800; color: #6B6B7A;
+    text-transform: uppercase; letter-spacing: 1px;
+    padding-left: 6px; margin-bottom: 10px;
+  }
+  .clue-card {
+    background: #fff;
+    border-left: 3px solid var(--purple);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    display: flex; align-items: flex-start; gap: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: all 0.18s ease;
+  }
+  .clue-card:hover { transform: translateX(2px); }
+  .clue-card.active {
+    border-left-color: var(--coral);
+    border-left-width: 4px;
+    background: var(--coral-soft);
+    box-shadow: 0 4px 14px rgba(255,107,107,0.18);
+  }
+  .clue-card .num { font-weight: 900; color: var(--purple); font-size: 15px; flex-shrink: 0; min-width: 22px; }
+  .clue-card.active .num { color: var(--coral); }
+  .clue-card .text { font-size: 15px; line-height: 1.5; color: var(--dark); font-weight: 600; }
+
+  .hint-btn-row { margin-top: 14px; }
+  .hint-btn {
+    width: 100%;
+    background: var(--coral-bg);
+    border: 2px solid #E8B100;
+    color: #6B4400;
+    font-weight: 900; font-size: 15px;
+    padding: 14px 18px;
+    border-radius: 50px;
+    min-height: 52px;
+    transition: all 0.18s ease;
+  }
+  .hint-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255,176,0,0.3); }
+  .hint-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .submit-btn-row { margin-top: 16px; }
+  .wrong-list { margin-top: 14px; padding: 14px 16px; border-radius: 14px; background: #fff5f5; border: 2px solid #ff7777; text-align: left; }
+  .wrong-list-title { font-size: 15px; font-weight: 700; color: #b03030; margin-bottom: 8px; }
+  .wrong-list-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; font-size: 14px; color: #b03030; background: #ffecec; border-radius: 8px; margin-bottom: 6px; }
+  .wrong-list-item:last-child { margin-bottom: 0; }
+  .wrong-list-x { color: #d33; font-weight: 700; font-size: 16px; }
+  .submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    color: #fff;
+    font-weight: 900; font-size: 18px;
+    padding: 16px 24px;
+    border-radius: 50px;
+    min-height: 54px;
+    box-shadow: 0 8px 20px rgba(140,198,63,0.4);
+    transition: all 0.18s ease;
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(140,198,63,0.5); }
+
+  .penalty-pop {
+    position: fixed;
+    color: var(--coral); font-weight: 900; font-size: 18px;
+    animation: penaltyFly 1s ease forwards;
+    pointer-events: none; z-index: 250;
+  }
+  @keyframes penaltyFly {
+    0% { opacity: 0; transform: translateY(8px); }
+    25% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-40px); }
+  }
+
+  .end-card {
+    background: #fff; border-radius: 22px;
+    padding: 36px 26px; box-shadow: var(--shadow);
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .end-card.shake { animation: cardShake 0.55s ease; }
+  @keyframes cardShake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+  .end-emoji { font-size: 72px; margin-bottom: 8px; line-height: 1; }
+  .end-title { font-size: 34px; font-weight: 900; color: var(--purple); letter-spacing: -0.5px; margin-bottom: 6px; }
+  .end-title.fail { color: var(--coral); }
+  .end-sub { font-size: 15px; color: #555; font-weight: 600; margin-bottom: 22px; }
+  .end-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 22px; }
+  .end-stat { background: var(--teal-light); border-radius: 14px; padding: 14px 8px; }
+  .end-stat-num { font-size: 30px; font-weight: 900; color: var(--purple-deep); line-height: 1; }
+  .end-stat-label { font-size: 14px; font-weight: 800; color: #6B6B7A; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  .brain-note {
+    background: var(--purple-soft);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 22px;
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 600;
+    color: var(--purple-deep);
+    text-align: left;
+  }
+  .brain-note b { color: var(--purple-deep); font-weight: 900; }
+  .story-note {
+    background: linear-gradient(180deg, #FFFDF4 0%, #FFF7E2 100%);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 18px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--dark);
+    text-align: left;
+    border: 2px solid #F2D98A;
+    max-height: 320px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .story-note .story-title {
+    display: block;
+    font-size: 14px; font-weight: 900;
+    color: var(--purple-deep);
+    text-transform: uppercase; letter-spacing: 0.6px;
+    margin-bottom: 8px;
+  }
+  .story-note p { margin: 0 0 10px 0; font-size: 15px; }
+  .story-note p:last-child { margin-bottom: 0; }
+  .story-note .opener { font-weight: 700; color: var(--purple-deep); }
+  .story-note .closer { font-style: italic; color: var(--teal); }
+  .story-note b { color: var(--purple-deep); font-weight: 800; }
+  @media (max-width: 480px) {
+    .story-note { font-size: 14px; padding: 14px; max-height: 260px; }
+    .story-note p { font-size: 14px; }
+  }
+  .end-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .end-actions .btn {
+    padding: 14px 24px; border-radius: 50px;
+    font-weight: 800; font-size: 15px;
+    transition: all 0.18s ease;
+    min-height: 48px; min-width: 120px;
+    flex: 1 1 130px;
+  }
+  .btn-purple { background: var(--purple); color: #fff; box-shadow: 0 6px 18px rgba(107,75,246,0.3); }
+  .btn-teal { background: var(--teal); color: #fff; box-shadow: 0 6px 18px rgba(0,180,216,0.3); }
+  .btn-coral { background: var(--coral); color: #fff; box-shadow: 0 6px 18px rgba(255,107,107,0.3); }
+  .btn-light { background: var(--gray); color: var(--dark); }
+  .end-actions .btn:hover { transform: translateY(-2px); }
+
+  .end-confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 100; }
+  .end-confetti i {
+    position: absolute; width: 10px; height: 14px; border-radius: 2px;
+    top: -20px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0); opacity: 1; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0.5; }
+  }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--dark); color: #fff;
+    padding: 12px 20px; border-radius: 50px;
+    font-weight: 800; font-size: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0; z-index: 400;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  @media (max-width: 480px) {
+    table.grid td.cell, table.grid td.empty { width: 48px; height: 48px; font-size: 22px; }
+    table.grid th.col-item { min-width: 48px; font-size: 14px; padding: 6px 4px; }
+    table.grid th.row-item { min-width: 86px; font-size: 14px; padding: 6px 6px; }
+    table.grid th.axis-name { font-size: 13px; padding: 5px 6px; }
+    .container { padding: 18px 12px; }
+    .topbar { padding: 10px 14px; }
+    .home-link { font-size: 16px; }
+    .stat { padding: 6px 10px; min-width: 64px; font-size: 14px; }
+    h1.page-title { font-size: 36px; }
+    .puzzle-title { font-size: 19px; }
+    .end-emoji { font-size: 56px; }
+    .end-title { font-size: 28px; }
+    .end-stat-num { font-size: 24px; }
+    .end-actions .btn { flex: 1 1 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="home-link" href="/">
+    <span>🦉</span><span>Puzzle<span class="brand">Perch</span></span>
+  </a>
+  <div class="topbar-right" id="hudRow" style="display:none;">
+    <div class="stat score">⭐ <span id="scoreVal">0</span></div>
+    <div class="stat timer">⏱ <span id="timerVal">0:00</span></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <section class="screen active" id="chooseScreen">
+    <h1 class="page-title">Logic Lagoon</h1>
+    <div class="page-sub">🌊 Dive into deductive reasoning</div>
+    <p class="chooser-intro">Read the clues. Mark cells with ✗ for "no" and ✓ for "yes". Use process of elimination to crack each puzzle.</p>
+
+    <div class="diff-list" id="diffList">
+      <button class="diff-card" data-d="easy">
+        <span class="emoji">🟢</span>
+        <span class="body">
+          <div class="label">Easy</div>
+          <div class="meta">3 people × 2 categories · 4 clues</div>
+          <div class="desc">Quick warm-up puzzles. Great for any age.</div>
+        </span>
+      </button>
+      <button class="diff-card" data-d="medium">
+        <span class="emoji">🟡</span>
+        <span class="body">
+          <div class="label">Medium</div>
+          <div class="meta">4 people × 3 categories · 6 clues</div>
+          <div class="desc">Classic logic-grid challenge. The sweet spot.</div>
+        </span>
+      </button>
+      <button class="diff-card" data-d="hard">
+        <span class="emoji">🔴</span>
+        <span class="body">
+          <div class="label">Hard</div>
+          <div class="meta">5 people × 4 categories · 9 clues</div>
+          <div class="desc">A real brain workout. Multi-step deductions.</div>
+        </span>
+      </button>
+    </div>
+
+    <div class="start-btn-wrap">
+      <button class="btn-start" id="startBtn" disabled>Let's Solve It!</button>
+    </div>
+  </section>
+
+  <section class="screen" id="gameScreen">
+    <div class="game-header">
+      <div>
+        <div class="puzzle-title" id="puzzleTitle">—</div>
+        <div class="puzzle-sub" id="puzzleSub">—</div>
+      </div>
+    </div>
+
+    <div class="scroll-hint">← Scroll to see full grid →</div>
+    <div class="grid-wrap">
+      <table class="grid" id="gridTable"></table>
+    </div>
+
+    <div class="clues-section">
+      <div class="clues-title">📋 Clues</div>
+      <div id="clueList"></div>
+    </div>
+
+    <div class="hint-btn-row">
+      <button class="hint-btn" id="hintBtn">💡 Get a Hint (-5 pts)</button>
+    </div>
+
+    <div class="submit-btn-row">
+      <button class="submit-btn" id="submitBtn">I've Solved It!</button>
+    </div>
+  </section>
+
+  <section class="screen" id="resultScreen">
+    <div class="end-card" id="endCard">
+      <div class="end-emoji" id="endEmoji">🎉</div>
+      <div class="end-title" id="endTitle">Solved!</div>
+      <div class="end-sub" id="endSub">Nice deduction!</div>
+
+      <div class="end-stats" id="endStats">
+        <div class="end-stat"><div class="end-stat-num" id="finalScore">0</div><div class="end-stat-label">Score</div></div>
+        <div class="end-stat"><div class="end-stat-num" id="finalTime">0:00</div><div class="end-stat-label">Time</div></div>
+        <div class="end-stat"><div class="end-stat-num" id="finalHints">0</div><div class="end-stat-label">Hints</div></div>
+      </div>
+
+      <div class="brain-note" id="brainNote">
+        <b>🧠 Brain region trained:</b> Logic Lagoon trains your <b>Prefrontal Cortex</b> — the region responsible for deductive reasoning and problem solving.
+      </div>
+
+      <div class="story-note" id="storyNote" hidden></div>
+
+      <div class="wrong-list" id="wrongList" hidden></div>
+
+      <div class="end-actions" id="endActions"></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+(function () {
+  const state = {
+    bank: null,
+    difficulty: null,
+    puzzle: null,
+    grid: {},
+    clueIdx: -1,
+    hintsUsed: 0,
+    wrongSubmits: 0,
+    score: 100,
+    secs: 0,
+    timerHandle: null,
+    started: false,
+    finished: false,
+  };
+
+  const SEEN_KEY = 'll_seen';
+
+  const DIFF_META = {
+    easy:   { mult: 1,   base: 100 },
+    medium: { mult: 1.5, base: 100 },
+    hard:   { mult: 2,   base: 100 },
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const screens = {
+    choose: $('chooseScreen'),
+    game:   $('gameScreen'),
+    result: $('resultScreen'),
+  };
+  function show(name) {
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+    $('hudRow').style.display = (name === 'game') ? 'flex' : 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toast._h);
+    toast._h = setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  function getSeen() {
+    try { return JSON.parse(localStorage.getItem(SEEN_KEY) || '{}') || {}; }
+    catch { return {}; }
+  }
+  function markSeen(diff, id) {
+    const s = getSeen();
+    s[diff] = s[diff] || [];
+    if (!s[diff].includes(id)) s[diff].push(id);
+    try { localStorage.setItem(SEEN_KEY, JSON.stringify(s)); } catch {}
+  }
+  function pickPuzzle(diff) {
+    if (!state.bank) return null;
+    const pool = state.bank[diff] || [];
+    if (pool.length === 0) return null;
+    const seen = (getSeen()[diff] || []);
+    let avail = pool.filter(p => !seen.includes(p.id));
+    if (avail.length === 0) {
+      const s = getSeen(); s[diff] = [];
+      try { localStorage.setItem(SEEN_KEY, JSON.stringify(s)); } catch {}
+      avail = pool.slice();
+    }
+    return avail[Math.floor(Math.random() * avail.length)];
+  }
+
+  function validatePuzzle(p) {
+    if (!p || !p.people || !p.categories || !p.solution) return false;
+    const peopleN = p.people.length;
+    if (peopleN < 2) return false;
+    for (const cat of p.categories) {
+      if (!cat.items || cat.items.length !== peopleN) {
+        console.warn('Logic Lagoon: bad category size in', p.id, cat.name);
+        return false;
+      }
+      const seen = new Set();
+      for (const person of p.people) {
+        const sol = p.solution[person];
+        if (!sol || !(cat.name in sol)) {
+          console.warn('Logic Lagoon: missing solution for', p.id, person, cat.name);
+          return false;
+        }
+        const v = sol[cat.name];
+        if (!cat.items.includes(v)) {
+          console.warn('Logic Lagoon: solution value not in items', p.id, person, cat.name, v);
+          return false;
+        }
+        if (seen.has(v)) {
+          console.warn('Logic Lagoon: duplicate item in solution', p.id, cat.name, v);
+          return false;
+        }
+        seen.add(v);
+      }
+    }
+    for (const raw of (p.clues || [])) {
+      const clue = String(raw);
+      const lc = clue.toLowerCase();
+      const isNegative = /\bnot\b|n['’]t\b|\bno\b/.test(lc);
+      if (!isNegative) continue;
+      const peopleHit = p.people.filter(n => lc.includes(n.toLowerCase()));
+      if (peopleHit.length !== 1) continue;
+      const itemHits = [];
+      for (const cat of p.categories) {
+        for (const item of cat.items) {
+          if (lc.includes(item.toLowerCase())) itemHits.push({ cat: cat.name, item });
+        }
+      }
+      if (itemHits.length !== 1) continue;
+      const person = peopleHit[0];
+      const { cat, item } = itemHits[0];
+      if (p.solution[person][cat] === item) {
+        console.warn('Logic Lagoon: clue contradicts solution in', p.id, '—', clue);
+        return false;
+      }
+    }
+    return true;
+  }
+  function validateBank(bank) {
+    const out = { easy: [], medium: [], hard: [] };
+    for (const k of ['easy','medium','hard']) {
+      for (const p of (bank[k] || [])) {
+        if (validatePuzzle(p)) out[k].push(p);
+        else console.warn('Logic Lagoon: dropping invalid puzzle', p && p.id);
+      }
+    }
+    return out;
+  }
+
+  function buildAxes(p) {
+    const axes = [{ idx: 0, name: 'People', items: p.people.slice(), isPeople: true }];
+    p.categories.forEach((c, i) => axes.push({ idx: i + 1, name: c.name, items: c.items.slice(), isPeople: false }));
+    return axes;
+  }
+  function pairKey(a, b) { return a < b ? a + '|' + b : b + '|' + a; }
+  function freshCells(axes) {
+    const out = {};
+    for (let a = 0; a < axes.length; a++) {
+      for (let b = a + 1; b < axes.length; b++) {
+        const k = pairKey(a, b);
+        out[k] = {};
+        for (const ia of axes[a].items) {
+          out[k][ia] = {};
+          for (const ib of axes[b].items) out[k][ia][ib] = 'blank';
+        }
+      }
+    }
+    return out;
+  }
+  function getCellRaw(a, ia, b, ib) {
+    if (a === b) return null;
+    if (a < b) return state.cells[pairKey(a, b)][ia][ib];
+    return state.cells[pairKey(a, b)][ib][ia];
+  }
+  function setCellRaw(a, ia, b, ib, val) {
+    if (a === b) return;
+    if (a < b) state.cells[pairKey(a, b)][ia][ib] = val;
+    else state.cells[pairKey(a, b)][ib][ia] = val;
+  }
+  function isYes(v) { return v === 'yes' || v === 'auto-yes'; }
+  function isNo(v) { return v === 'no' || v === 'hint-no' || v === 'auto-no'; }
+
+  function renderGrid() {
+    const p = state.puzzle;
+    state.axes = buildAxes(p);
+    const axes = state.axes;
+    const N = axes.length;
+    const colAxes = axes.slice(0, N - 1);
+    const rowAxes = axes.slice(1);
+
+    const tbl = $('gridTable');
+    tbl.innerHTML = '';
+
+    const tr1 = document.createElement('tr');
+    const corner1 = document.createElement('th');
+    corner1.className = 'corner';
+    corner1.colSpan = 2;
+    tr1.appendChild(corner1);
+    colAxes.forEach((cax, ci) => {
+      const th = document.createElement('th');
+      th.className = 'axis-name';
+      if (ci > 0) th.classList.add('bdr-left');
+      th.colSpan = cax.items.length;
+      th.textContent = cax.name;
+      tr1.appendChild(th);
+    });
+    tbl.appendChild(tr1);
+
+    const tr2 = document.createElement('tr');
+    const corner2a = document.createElement('th');
+    corner2a.className = 'corner';
+    tr2.appendChild(corner2a);
+    const corner2b = document.createElement('th');
+    corner2b.className = 'corner';
+    tr2.appendChild(corner2b);
+    colAxes.forEach((cax, ci) => {
+      cax.items.forEach((it, ii) => {
+        const th = document.createElement('th');
+        th.className = 'col-item';
+        if (ci > 0 && ii === 0) th.classList.add('bdr-left');
+        th.dataset.axis = String(cax.idx);
+        th.dataset.item = it;
+        th.textContent = it;
+        tr2.appendChild(th);
+      });
+    });
+    tbl.appendChild(tr2);
+
+    rowAxes.forEach((rax, ri) => {
+      rax.items.forEach((rit, rii) => {
+        const tr = document.createElement('tr');
+        if (rii === 0) {
+          const thAx = document.createElement('th');
+          thAx.className = 'axis-name row';
+          if (ri > 0) thAx.classList.add('bdr-top');
+          thAx.rowSpan = rax.items.length;
+          thAx.textContent = rax.name;
+          tr.appendChild(thAx);
+        }
+        const thIt = document.createElement('th');
+        thIt.className = 'row-item';
+        if (ri > 0 && rii === 0) thIt.classList.add('bdr-top');
+        thIt.dataset.axis = String(rax.idx);
+        thIt.dataset.item = rit;
+        thIt.textContent = rit;
+        tr.appendChild(thIt);
+
+        colAxes.forEach((cax, ci) => {
+          cax.items.forEach((cit, cii) => {
+            if (cax.idx >= rax.idx) {
+              const td = document.createElement('td');
+              td.className = 'empty';
+              if (ci > 0 && cii === 0) td.classList.add('bdr-left');
+              if (ri > 0 && rii === 0) td.classList.add('bdr-top');
+              tr.appendChild(td);
+            } else {
+              const td = document.createElement('td');
+              td.className = 'cell';
+              if (ci > 0 && cii === 0) td.classList.add('bdr-left');
+              if (ri > 0 && rii === 0) td.classList.add('bdr-top');
+              td.dataset.rax = String(rax.idx);
+              td.dataset.rit = rit;
+              td.dataset.cax = String(cax.idx);
+              td.dataset.cit = cit;
+              td.addEventListener('click', () => onCellTap(rax.idx, rit, cax.idx, cit));
+              tr.appendChild(td);
+            }
+          });
+        });
+        tbl.appendChild(tr);
+      });
+    });
+
+    paintGrid();
+  }
+
+  function paintGrid() {
+    const wrongSet = new Set((state.wrongCells || []).map(w => w.rax + '|' + w.rit + '|' + w.cax + '|' + w.cit));
+    document.querySelectorAll('#gridTable td.cell').forEach(td => {
+      const rax = Number(td.dataset.rax);
+      const cax = Number(td.dataset.cax);
+      const s = getCellRaw(rax, td.dataset.rit, cax, td.dataset.cit);
+      const keepBdr = (td.classList.contains('bdr-left') ? ' bdr-left' : '') + (td.classList.contains('bdr-top') ? ' bdr-top' : '');
+      td.className = ('cell' + keepBdr).trim();
+      if (s === 'no') { td.classList.add('no'); td.textContent = '✗'; }
+      else if (s === 'yes') { td.classList.add('yes'); td.textContent = '✓'; }
+      else if (s === 'hint-no') { td.classList.add('hint-no'); td.textContent = '✗'; }
+      else if (s === 'auto-no') { td.classList.add('auto-no'); td.textContent = '✗'; }
+      else if (s === 'auto-yes') { td.classList.add('auto-yes'); td.textContent = '✓'; }
+      else td.textContent = '';
+      const key = rax + '|' + td.dataset.rit + '|' + cax + '|' + td.dataset.cit;
+      if (wrongSet.has(key)) td.classList.add('wrong');
+    });
+    paintHighlights();
+  }
+
+  function onCellTap(rax, rit, cax, cit) {
+    if (state.finished) return;
+    const cur = getCellRaw(rax, rit, cax, cit);
+    if (cur === 'hint-no') return;
+    const cycleFrom = (cur === 'auto-no' || cur === 'auto-yes') ? 'blank' : cur;
+    const next = cycleFrom === 'blank' ? 'no' : cycleFrom === 'no' ? 'yes' : 'blank';
+    setCellRaw(rax, rit, cax, cit, next);
+    state.wrongCells = [];
+    propagate();
+    paintGrid();
+  }
+
+  function propagate() {
+    if (!state.axes) return;
+    const axes = state.axes;
+    let changed = true;
+    let safety = 0;
+    while (changed && safety++ < 50) {
+      changed = false;
+      for (let a = 0; a < axes.length; a++) {
+        for (let b = a + 1; b < axes.length; b++) {
+          const A = axes[a].items, B = axes[b].items;
+          for (const ia of A) {
+            let yes = null, blanks = [], noCount = 0;
+            for (const ib of B) {
+              const v = state.cells[pairKey(a, b)][ia][ib];
+              if (isYes(v)) yes = ib;
+              else if (isNo(v)) noCount++;
+              else blanks.push(ib);
+            }
+            if (yes !== null) {
+              for (const ib of B) if (ib !== yes) {
+                const v = state.cells[pairKey(a, b)][ia][ib];
+                if (v === 'blank') { state.cells[pairKey(a, b)][ia][ib] = 'auto-no'; changed = true; }
+              }
+            } else if (blanks.length === 1 && noCount === B.length - 1) {
+              state.cells[pairKey(a, b)][ia][blanks[0]] = 'auto-yes'; changed = true;
+            }
+          }
+          for (const ib of B) {
+            let yes = null, blanks = [], noCount = 0;
+            for (const ia of A) {
+              const v = state.cells[pairKey(a, b)][ia][ib];
+              if (isYes(v)) yes = ia;
+              else if (isNo(v)) noCount++;
+              else blanks.push(ia);
+            }
+            if (yes !== null) {
+              for (const ia of A) if (ia !== yes) {
+                const v = state.cells[pairKey(a, b)][ia][ib];
+                if (v === 'blank') { state.cells[pairKey(a, b)][ia][ib] = 'auto-no'; changed = true; }
+              }
+            } else if (blanks.length === 1 && noCount === A.length - 1) {
+              state.cells[pairKey(a, b)][blanks[0]][ib] = 'auto-yes'; changed = true;
+            }
+          }
+        }
+      }
+      for (let a = 0; a < axes.length; a++) {
+        for (let b = 0; b < axes.length; b++) {
+          if (a === b) continue;
+          for (let c = 0; c < axes.length; c++) {
+            if (c === a || c === b) continue;
+            for (const ia of axes[a].items) {
+              for (const ib of axes[b].items) {
+                if (!isYes(getCellRaw(a, ia, b, ib))) continue;
+                for (const ic of axes[c].items) {
+                  const ac = getCellRaw(a, ia, c, ic);
+                  const bc = getCellRaw(b, ib, c, ic);
+                  if (isYes(ac) && bc === 'blank') { setCellRaw(b, ib, c, ic, 'auto-yes'); changed = true; }
+                  if (isYes(bc) && ac === 'blank') { setCellRaw(a, ia, c, ic, 'auto-yes'); changed = true; }
+                  if (isNo(bc) && ac === 'blank') { setCellRaw(a, ia, c, ic, 'auto-no'); changed = true; }
+                  if (isNo(ac) && bc === 'blank') { setCellRaw(b, ib, c, ic, 'auto-no'); changed = true; }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function renderClues() {
+    const p = state.puzzle;
+    const list = $('clueList');
+    list.innerHTML = '';
+    p.clues.forEach((c, i) => {
+      const card = document.createElement('button');
+      card.className = 'clue-card';
+      card.dataset.idx = i;
+      card.innerHTML = '<span class="num">' + (i + 1) + '.</span><span class="text"></span>';
+      card.querySelector('.text').textContent = c;
+      card.addEventListener('click', () => onClueTap(i));
+      list.appendChild(card);
+    });
+  }
+  function onClueTap(i) {
+    state.clueIdx = (state.clueIdx === i) ? -1 : i;
+    paintHighlights();
+  }
+  function paintHighlights() {
+    document.querySelectorAll('.clue-card').forEach(c => {
+      c.classList.toggle('active', Number(c.dataset.idx) === state.clueIdx);
+    });
+    document.querySelectorAll('th.col-item, th.row-item').forEach(th => th.classList.remove('highlight'));
+    if (state.clueIdx < 0 || !state.axes) return;
+    const p = state.puzzle;
+    const text = (p.clues[state.clueIdx] || '').toLowerCase();
+    for (const ax of state.axes) {
+      for (const it of ax.items) {
+        if (text.includes(it.toLowerCase())) {
+          document.querySelectorAll('th.col-item[data-axis="' + ax.idx + '"][data-item="' + cssEscape(it) + '"], th.row-item[data-axis="' + ax.idx + '"][data-item="' + cssEscape(it) + '"]').forEach(el => el.classList.add('highlight'));
+        }
+      }
+    }
+  }
+  function cssEscape(s) {
+    if (window.CSS && CSS.escape) return CSS.escape(s);
+    return String(s).replace(/["\\]/g, '\\$&');
+  }
+
+  function onHint() {
+    if (state.finished) return;
+    const p = state.puzzle;
+    const candidates = [];
+    p.categories.forEach((cat, ci) => {
+      const cAxis = ci + 1;
+      for (const person of p.people) {
+        for (const item of cat.items) {
+          const truth = (p.solution[person][cat.name] === item) ? 'yes' : 'no';
+          const cur = getCellRaw(0, person, cAxis, item);
+          if (truth === 'no' && (cur === 'blank' || cur === 'auto-no')) {
+            candidates.push({ a: 0, ia: person, b: cAxis, ib: item });
+          }
+        }
+      }
+    });
+    if (candidates.length === 0) {
+      toast('No hint available!');
+      return;
+    }
+    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+    setCellRaw(pick.a, pick.ia, pick.b, pick.ib, 'hint-no');
+    state.hintsUsed += 1;
+    state.score = Math.max(0, state.score - 5);
+    updateHud();
+    propagate();
+    paintGrid();
+    flyPenalty(5);
+    $('hintBtn').textContent = '💡 Hint (used ' + state.hintsUsed + (state.hintsUsed === 1 ? ' time' : ' times') + ')';
+  }
+
+  function onSubmit() {
+    if (state.finished) return;
+    const p = state.puzzle;
+    const wrongCells = [];
+    let yesCount = 0;
+    let totalRequired = 0;
+    p.categories.forEach((cat, ci) => {
+      const cAxis = ci + 1;
+      for (const person of p.people) {
+        const truthItem = p.solution[person][cat.name];
+        let rowHasYes = false;
+        for (const item of cat.items) {
+          const cur = getCellRaw(0, person, cAxis, item);
+          if (isYes(cur)) {
+            rowHasYes = true;
+            yesCount += 1;
+            if (item !== truthItem) wrongCells.push({ rax: cAxis, rit: item, cax: 0, cit: person });
+          }
+        }
+        totalRequired += 1;
+        if (!rowHasYes) {}
+      }
+    });
+    const allCorrect = (wrongCells.length === 0) && (yesCount === totalRequired);
+    if (allCorrect) {
+      finishWin();
+    } else {
+      state.wrongSubmits += 1;
+      state.score = Math.max(0, state.score - 10);
+      updateHud();
+      flyPenalty(10);
+      if (wrongCells.length > 0) {
+        state.wrongCells = wrongCells;
+        wrongCells.forEach(w => {
+          const td = document.querySelector(
+            'td.cell[data-rax="' + w.rax + '"][data-rit="' + cssEscape(w.rit) + '"]'
+            + '[data-cax="' + w.cax + '"][data-cit="' + cssEscape(w.cit) + '"]'
+          );
+          if (td) td.classList.add('wrong');
+        });
+        setTimeout(finishLose, 450);
+      } else {
+        toast('Fill in all ✓ marks first!');
+      }
+    }
+  }
+
+  function flyPenalty(n) {
+    const el = document.createElement('div');
+    el.className = 'penalty-pop';
+    el.textContent = '-' + n + ' pts';
+    const r = $('hintBtn').getBoundingClientRect();
+    el.style.left = (r.left + r.width / 2 - 24) + 'px';
+    el.style.top = (r.top - 6) + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1100);
+  }
+
+  function startTimer() {
+    state.secs = 0;
+    state.started = true;
+    updateHud();
+    clearInterval(state.timerHandle);
+    state.timerHandle = setInterval(() => {
+      state.secs += 1;
+      updateHud();
+    }, 1000);
+  }
+  function stopTimer() { clearInterval(state.timerHandle); state.timerHandle = null; }
+  function fmtTime(s) {
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return m + ':' + (r < 10 ? '0' : '') + r;
+  }
+  function updateHud() {
+    $('scoreVal').textContent = Math.round(state.score * DIFF_META[state.difficulty].mult);
+    $('timerVal').textContent = fmtTime(state.secs);
+  }
+
+  function speedBonus() {
+    if (state.secs < 120) return 30;
+    if (state.secs < 240) return 20;
+    if (state.secs < 360) return 10;
+    return 0;
+  }
+  function finishWin() {
+    state.finished = true;
+    stopTimer();
+    const raw = state.score + speedBonus();
+    const final = Math.round(raw * DIFF_META[state.difficulty].mult);
+    showResult(true, final);
+    confettiBurst();
+  }
+  function finishLose() {
+    state.finished = true;
+    stopTimer();
+    const final = Math.round(state.score * DIFF_META[state.difficulty].mult);
+    showResult(false, final);
+  }
+
+  function buildStory(p) {
+    const people = p.people.slice();
+    const cats = p.categories.map(c => c.name);
+    const opener = pickOpener(p.theme, people);
+    const sentences = people.map((person, i) => sentenceForPerson(person, i, cats, p.solution[person]));
+    const closer = pickCloser(people.length);
+    return { opener, sentences, closer };
+  }
+  function pickOpener(theme, people) {
+    const escaped = people.map(escHtml);
+    const last = escaped[escaped.length - 1];
+    const list = escaped.length === 1 ? escaped[0]
+      : escaped.slice(0, -1).join(', ') + ' and ' + last;
+    const themeLine = theme ? (' in the tale of <b>' + escHtml(theme) + '</b>') : '';
+    return 'Here\'s how it all came together' + themeLine + ' — ' + list + ' each had a story to tell.';
+  }
+  function pickCloser(n) {
+    if (n <= 3) return 'Mystery solved! 🌊🦉';
+    if (n === 4) return 'Every clue clicked into place. Nicely deduced! 🌊🦉';
+    return 'Five threads, one tidy ending — beautifully reasoned! 🌊🦉';
+  }
+  function sentenceForPerson(person, idx, cats, attrs) {
+    const leadIns = [
+      escHtml(person) + ' turned out to have',
+      'As for ' + escHtml(person) + ', they had',
+      escHtml(person) + ' was the one with',
+      'It was ' + escHtml(person) + ' who had',
+      'Meanwhile, ' + escHtml(person) + ' had'
+    ];
+    const lead = leadIns[idx % leadIns.length];
+    const parts = cats.map(c => '<b>' + escHtml(attrs[c]) + '</b> for ' + escHtml(c.toLowerCase()));
+    let body;
+    if (parts.length === 1) body = parts[0];
+    else if (parts.length === 2) body = parts[0] + ' and ' + parts[1];
+    else body = parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1];
+    return lead + ' ' + body + '.';
+  }
+  function escHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+  function renderStory(p) {
+    const el = $('storyNote');
+    const { opener, sentences, closer } = buildStory(p);
+    let html = '<span class="story-title">📖 The Story</span>';
+    html += '<p class="opener">' + opener + '</p>';
+    sentences.forEach(s => { html += '<p>' + s + '</p>'; });
+    html += '<p class="closer">' + escHtml(closer) + '</p>';
+    el.innerHTML = html;
+    el.hidden = false;
+    el.scrollTop = 0;
+  }
+
+  function showResult(won, finalScore) {
+    show('result');
+    const card = $('endCard');
+    card.classList.toggle('shake', !won);
+    $('endEmoji').textContent = won ? '🎉' : '🤔';
+    const t = $('endTitle');
+    t.textContent = won ? 'Solved!' : 'Not quite!';
+    t.classList.toggle('fail', !won);
+    $('endSub').textContent = won
+      ? 'Brilliant deduction. Your prefrontal cortex thanks you.'
+      : 'Some cells are incorrect. The wrong ones are highlighted — try again!';
+    $('finalScore').textContent = finalScore;
+    $('finalTime').textContent = fmtTime(state.secs);
+    $('finalHints').textContent = state.hintsUsed;
+    $('brainNote').style.display = won ? 'block' : 'none';
+
+    const storyEl = $('storyNote');
+    if (won && state.puzzle) {
+      renderStory(state.puzzle);
+    } else {
+      storyEl.hidden = true;
+      storyEl.innerHTML = '';
+    }
+
+    const wl = $('wrongList');
+    wl.innerHTML = '';
+    if (!won && state.wrongCells && state.wrongCells.length) {
+      wl.hidden = false;
+      const title = document.createElement('div');
+      title.className = 'wrong-list-title';
+      title.textContent = 'Incorrect placements (' + state.wrongCells.length + ')';
+      wl.appendChild(title);
+      state.wrongCells.forEach(w => {
+        const row = document.createElement('div');
+        row.className = 'wrong-list-item';
+        const x = document.createElement('span');
+        x.className = 'wrong-list-x';
+        x.textContent = '✗';
+        row.appendChild(x);
+        const axes = state.axes || buildAxes(state.puzzle);
+        const catAxis = w.cax === 0 ? axes[w.rax] : axes[w.cax];
+        const personLabel = w.cax === 0 ? w.cit : w.rit;
+        const itemLabel = w.cax === 0 ? w.rit : w.cit;
+        row.appendChild(document.createTextNode(personLabel + ' — ' + catAxis.name + ': ' + itemLabel));
+        wl.appendChild(row);
+      });
+    } else {
+      wl.hidden = true;
+    }
+
+    const actions = $('endActions');
+    actions.innerHTML = '';
+    if (won) {
+      const bShare = btn('btn btn-teal', '📤 Share', () => shareResult(finalScore));
+      const bAgain = btn('btn btn-purple', '🔁 Play Again', () => startNewGame(state.difficulty));
+      const bHome  = btn('btn btn-light', '🏠 Home', () => { window.location.href = '/'; });
+      actions.append(bShare, bAgain, bHome);
+    } else {
+      const bRetry = btn('btn btn-purple', '🔁 Try Again', () => returnToGame());
+      const bHint  = btn('btn btn-coral', '💡 Get a Hint', () => { returnToGame(); onHint(); });
+      const bHome  = btn('btn btn-light', '🏠 Home', () => { window.location.href = '/'; });
+      actions.append(bRetry, bHint, bHome);
+    }
+  }
+  function btn(cls, label, fn) {
+    const b = document.createElement('button');
+    b.className = cls;
+    b.textContent = label;
+    b.addEventListener('click', fn);
+    return b;
+  }
+  function returnToGame() {
+    state.finished = false;
+    show('game');
+    if (!state.timerHandle) {
+      state.timerHandle = setInterval(() => { state.secs += 1; updateHud(); }, 1000);
+    }
+  }
+
+  function shareResult(finalScore) {
+    const diffLabel = state.difficulty.toUpperCase();
+    const txt = "I solved Logic Lagoon in " + fmtTime(state.secs) + "\n"
+      + "using " + state.hintsUsed + " hints!\n"
+      + "Difficulty: " + diffLabel + "\n"
+      + "Score: " + finalScore + "\n"
+      + "Can you beat me? puzzleperch.com 🦉";
+    if (navigator.share) {
+      navigator.share({ text: txt }).catch(() => copyText(txt));
+    } else {
+      copyText(txt);
+    }
+  }
+  function copyText(t) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(() => toast('Copied to clipboard!'),
+        () => fallbackCopy(t));
+    } else {
+      fallbackCopy(t);
+    }
+  }
+  function fallbackCopy(t) {
+    const ta = document.createElement('textarea');
+    ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast('Copied to clipboard!'); }
+    catch { toast('Copy failed'); }
+    ta.remove();
+  }
+
+  function confettiBurst() {
+    const wrap = document.createElement('div');
+    wrap.className = 'end-confetti';
+    document.body.appendChild(wrap);
+    const colors = ['#6B4BF6', '#8CC63F', '#FF6B6B', '#00B4D8', '#FFD93D'];
+    for (let i = 0; i < 80; i++) {
+      const piece = document.createElement('i');
+      piece.style.left = (Math.random() * 100) + 'vw';
+      piece.style.background = colors[i % colors.length];
+      piece.style.animationDuration = (2 + Math.random() * 2.5) + 's';
+      piece.style.animationDelay = (Math.random() * 0.6) + 's';
+      wrap.appendChild(piece);
+    }
+    setTimeout(() => wrap.remove(), 5500);
+  }
+
+  function startNewGame(diff) {
+    const p = pickPuzzle(diff);
+    if (!p) { toast('No puzzles available'); return; }
+    markSeen(diff, p.id);
+    state.difficulty = diff;
+    state.puzzle = p;
+    state.axes = buildAxes(p);
+    state.cells = freshCells(state.axes);
+    state.clueIdx = -1;
+    state.hintsUsed = 0;
+    state.wrongSubmits = 0;
+    state.score = DIFF_META[diff].base;
+    state.secs = 0;
+    state.finished = false;
+    state.wrongCells = [];
+    $('puzzleTitle').textContent = p.theme;
+    $('puzzleSub').textContent = labelFor(diff) + ' · ' + p.people.length + ' people × ' + p.categories.length + ' categories';
+    $('hintBtn').textContent = '💡 Get a Hint (-5 pts)';
+    renderGrid();
+    renderClues();
+    show('game');
+    updateHud();
+    startTimer();
+  }
+  function labelFor(d) {
+    return d === 'easy' ? '🟢 Easy' : d === 'medium' ? '🟡 Medium' : '🔴 Hard';
+  }
+
+  document.querySelectorAll('.diff-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.diff-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state.difficulty = card.dataset.d;
+      $('startBtn').disabled = false;
+    });
+  });
+  $('startBtn').addEventListener('click', () => {
+    if (!state.difficulty) return;
+    startNewGame(state.difficulty);
+  });
+  $('hintBtn').addEventListener('click', onHint);
+  $('submitBtn').addEventListener('click', onSubmit);
+
+  fetch('/data/puzzles-logic.json', { cache: 'no-store' })
+    .then(r => r.json())
+    .then(bank => {
+      state.bank = validateBank(bank);
+      const counts = ['easy','medium','hard'].map(k => k + ':' + state.bank[k].length).join(' / ');
+      console.log('Logic Lagoon bank loaded —', counts);
+    })
+    .catch(err => {
+      console.error('Logic Lagoon: failed to load puzzles', err);
+      toast('Failed to load puzzles');
+    });
+})();
+</script>
+</body>
+</html>
