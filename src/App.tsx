@@ -176,6 +176,24 @@ function App() {
             </div>
             <div className="badge-bottom badge-amber">Think Sideways!</div>
           </a>
+
+          {/* Memory Meadow */}
+          <a className="card meadow" href="/memory-meadow.html" style={{ cursor: 'pointer' }}>
+            <div className="card-title">Memory Meadow</div>
+            <div className="card-preview preview-meadow">
+              <span>🌸</span>
+              <span className="meadow-bubble">🧠</span>
+            </div>
+            <div className="card-meta meadow-desc">
+              Four memory games in surprise order — train your recall
+            </div>
+            <div className="card-tags">
+              <span className="tag new">New</span>
+              <span className="tag">Memory</span>
+              <span className="tag">Focus</span>
+            </div>
+            <div className="badge-bottom badge-lavender">Train Your Brain!</div>
+          </a>
         </div>
       </section>
 

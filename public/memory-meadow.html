@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>Memory Meadow · PuzzlePerch</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lav: #A594F9;
+    --lav-soft: #D6CCFF;
+    --lav-deep: #6B52D4;
+    --lav-bg: #F4F0FF;
+    --green: #8CC63F;
+    --purple: #6B4BF6;
+    --coral: #FF6B6B;
+    --amber: #F5A623;
+    --teal: #00B4D8;
+    --pink: #FF8FB1;
+    --dark: #1A1A2E;
+    --gray: #F5F5F5;
+    --shadow-card: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    color: var(--dark);
+    background: linear-gradient(180deg, var(--lav-bg) 0%, #fff 40%);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button { font-family: inherit; cursor: pointer; border: none; font-weight: 800; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ===== NAV ===== */
+  .nav { background: #fff; border-bottom: 1px solid #eee; }
+  .nav-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand-link {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 22px; font-weight: 900; color: var(--purple);
+  }
+  .brand-link .brand { color: var(--dark); }
+  .hud { display: flex; align-items: center; gap: 10px; }
+  .hud .chip {
+    background: var(--lav-soft);
+    color: var(--lav-deep);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-weight: 900;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hud .chip.round {
+    background: #EDE8FF;
+    color: var(--purple);
+  }
+  .mute-btn {
+    background: transparent;
+    color: var(--lav-deep);
+    padding: 6px 10px;
+    border-radius: 50px;
+    font-size: 18px;
+    border: 2px solid var(--lav-soft);
+    transition: background 0.2s ease;
+  }
+  .mute-btn:hover { background: var(--lav-soft); }
+
+  /* ===== LAYOUT ===== */
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 36px 28px;
+    box-shadow: var(--shadow-card);
+  }
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== CHOOSER ===== */
+  .chooser h1 {
+    font-size: 40px;
+    font-weight: 900;
+    color: var(--lav-deep);
+    text-align: center;
+    margin-bottom: 8px;
+    line-height: 1.1;
+  }
+  .chooser .tagline {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #666;
+    margin-bottom: 28px;
+  }
+  .howto {
+    background: var(--lav-bg);
+    border-left: 4px solid var(--lav);
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1.5;
+  }
+  .howto b { color: var(--lav-deep); }
+
+  .section-label {
+    font-size: 13px;
+    font-weight: 900;
+    color: #888;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .diff-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .diff-chip {
+    background: #F5F5F5;
+    color: var(--dark);
+    padding: 14px 8px;
+    border-radius: 16px;
+    font-weight: 900;
+    font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+    border: 3px solid transparent;
+  }
+  .diff-chip .emoji { font-size: 22px; }
+  .diff-chip:hover { transform: translateY(-2px); }
+  .diff-chip.active {
+    background: var(--lav-soft);
+    color: var(--lav-deep);
+    border-color: var(--lav);
+    box-shadow: 0 6px 16px rgba(165, 148, 249, 0.3);
+  }
+  .play-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--lav), #B8A8FF);
+    color: #fff;
+    border-radius: 50px;
+    font-size: 17px;
+    font-weight: 900;
+    box-shadow: 0 6px 20px rgba(165, 148, 249, 0.4);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+  }
+  .play-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(165, 148, 249, 0.5); }
+  .play-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ===== ROUND INTRO ===== */
+  .round-intro {
+    text-align: center;
+    padding: 40px 16px;
+    animation: pulseIn 0.5s ease;
+  }
+  @keyframes pulseIn {
+    0% { opacity: 0; transform: scale(0.92); }
+    60% { opacity: 1; transform: scale(1.04); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .round-intro .big-emoji { font-size: 80px; margin-bottom: 10px; }
+  .round-intro .format-name {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--lav-deep);
+    margin-bottom: 6px;
+  }
+  .round-intro .format-desc {
+    font-size: 15px;
+    font-weight: 700;
+    color: #666;
+    margin-bottom: 24px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.4;
+  }
+  .round-intro .start-btn {
+    padding: 14px 36px;
+    background: var(--lav);
+    color: #fff;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 900;
+    box-shadow: 0 6px 18px rgba(165, 148, 249, 0.4);
+  }
+
+  /* ===== TIMER & STATUS ===== */
+  .game-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #666;
+  }
+  .game-status .timer {
+    background: var(--lav-bg);
+    color: var(--lav-deep);
+    padding: 4px 14px;
+    border-radius: 50px;
+    font-weight: 900;
+  }
+
+  .instruction {
+    text-align: center;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--lav-deep);
+    margin-bottom: 18px;
+  }
+
+  /* ===== SIMON SAYS ===== */
+  .simon-grid {
+    display: grid;
+    gap: 12px;
+    margin: 0 auto 20px;
+    max-width: 360px;
+  }
+  .simon-grid.size-4 { grid-template-columns: repeat(2, 1fr); max-width: 280px; }
+  .simon-grid.size-6 { grid-template-columns: repeat(3, 1fr); max-width: 360px; }
+  .simon-grid.size-9 { grid-template-columns: repeat(3, 1fr); max-width: 360px; }
+
+  .simon-tile {
+    aspect-ratio: 1;
+    border-radius: 20px;
+    transition: transform 0.12s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    cursor: pointer;
+    opacity: 0.75;
+    position: relative;
+  }
+  .simon-tile:hover { transform: scale(1.03); }
+  .simon-tile.flash {
+    opacity: 1;
+    transform: scale(1.08);
+    filter: brightness(1.35);
+    box-shadow: 0 0 30px currentColor;
+  }
+  .simon-tile.disabled { cursor: not-allowed; opacity: 0.6; }
+  .simon-tile.disabled:hover { transform: none; }
+
+  .simon-t0 { background: linear-gradient(135deg, #8CC63F, #6FA52A); color: #8CC63F; }
+  .simon-t1 { background: linear-gradient(135deg, #6B4BF6, #4E35D0); color: #6B4BF6; }
+  .simon-t2 { background: linear-gradient(135deg, #FF6B6B, #DD4545); color: #FF6B6B; }
+  .simon-t3 { background: linear-gradient(135deg, #F5A623, #C47A00); color: #F5A623; }
+  .simon-t4 { background: linear-gradient(135deg, #00B4D8, #0077B6); color: #00B4D8; }
+  .simon-t5 { background: linear-gradient(135deg, #FF8FB1, #C56B85); color: #FF8FB1; }
+  .simon-t6 { background: linear-gradient(135deg, #FFD23F, #C9A200); color: #FFD23F; }
+  .simon-t7 { background: linear-gradient(135deg, #A594F9, #6B52D4); color: #A594F9; }
+  .simon-t8 { background: linear-gradient(135deg, #56CCF2, #2F80ED); color: #56CCF2; }
+
+  .simon-progress {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: #888;
+    margin-top: 10px;
+  }
+
+  /* ===== MEMORY CARDS ===== */
+  .cards-grid {
+    display: grid;
+    gap: 10px;
+    margin: 0 auto 20px;
+    max-width: 480px;
+  }
+  .cards-grid.size-8 { grid-template-columns: repeat(4, 1fr); }
+  .cards-grid.size-12 { grid-template-columns: repeat(4, 1fr); }
+  .cards-grid.size-20 { grid-template-columns: repeat(5, 1fr); }
+
+  .mem-card {
+    aspect-ratio: 1;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--lav), var(--lav-deep));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    color: #fff;
+    position: relative;
+    border: 3px solid transparent;
+    user-select: none;
+  }
+  .mem-card:hover:not(.flipped):not(.matched) { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.15); }
+  .mem-card.flipped {
+    background: #fff;
+    border-color: var(--lav);
+    color: inherit;
+  }
+  .mem-card.matched {
+    background: #EDF8DC;
+    border-color: var(--green);
+    color: inherit;
+    animation: matchPulse 0.4s ease;
+  }
+  @keyframes matchPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  .mem-card .back-icon { font-size: 28px; opacity: 0.8; }
+
+  .moves-count {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: #666;
+  }
+
+  @media (max-width: 480px) {
+    .cards-grid.size-8, .cards-grid.size-12 { grid-template-columns: repeat(3, 1fr); }
+    .cards-grid.size-20 { grid-template-columns: repeat(4, 1fr); }
+    .mem-card { font-size: 32px; }
+  }
+
+  /* ===== FLASH & RECALL ===== */
+  .flash-grid {
+    display: grid;
+    gap: 14px;
+    margin: 0 auto 16px;
+    max-width: 420px;
+  }
+  .flash-grid.show-4 { grid-template-columns: repeat(2, 1fr); max-width: 260px; }
+  .flash-grid.show-6 { grid-template-columns: repeat(3, 1fr); max-width: 360px; }
+  .flash-grid.show-8 { grid-template-columns: repeat(4, 1fr); max-width: 440px; }
+
+  .flash-item {
+    aspect-ratio: 1;
+    background: var(--lav-bg);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    border: 2px solid var(--lav-soft);
+  }
+
+  .countdown-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--lav-bg);
+    border-radius: 3px;
+    margin: 10px 0 20px;
+    overflow: hidden;
+  }
+  .countdown-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--lav), var(--lav-deep));
+    width: 100%;
+    transition: width linear;
+  }
+
+  .pick-grid {
+    display: grid;
+    gap: 10px;
+    margin: 0 auto 20px;
+  }
+  .pick-grid.opt-8  { grid-template-columns: repeat(4, 1fr); max-width: 440px; }
+  .pick-grid.opt-12 { grid-template-columns: repeat(4, 1fr); max-width: 440px; }
+  .pick-grid.opt-16 { grid-template-columns: repeat(4, 1fr); max-width: 440px; }
+
+  .pick-item {
+    aspect-ratio: 1;
+    background: #fff;
+    border: 3px solid #e0e0e0;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+  .pick-item:hover:not(.revealed) { transform: translateY(-2px); border-color: var(--lav); }
+  .pick-item.selected {
+    background: var(--lav-soft);
+    border-color: var(--lav);
+  }
+  .pick-item.revealed { cursor: not-allowed; }
+  .pick-item.correct { background: #EDF8DC; border-color: var(--green); }
+  .pick-item.incorrect { background: #FFE6E6; border-color: var(--coral); }
+  .pick-item.missed { background: #FFF7D9; border-color: var(--amber); opacity: 0.7; }
+
+  .submit-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .submit-btn {
+    padding: 12px 28px;
+    background: var(--purple);
+    color: #fff;
+    border-radius: 50px;
+    font-weight: 900;
+    font-size: 15px;
+    transition: transform 0.15s ease;
+  }
+  .submit-btn:hover:not(:disabled) { transform: translateY(-2px); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ===== SEQUENCE MEMORY ===== */
+  .sequence-display {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 0 auto 16px;
+    min-height: 80px;
+    align-items: center;
+  }
+  .seq-item {
+    width: 60px;
+    height: 60px;
+    background: var(--lav-bg);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    border: 2px solid var(--lav-soft);
+    animation: seqPop 0.3s ease;
+  }
+  @keyframes seqPop {
+    from { opacity: 0; transform: scale(0.6); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .slots-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .slot {
+    width: 52px;
+    height: 52px;
+    background: #fff;
+    border: 3px dashed var(--lav-soft);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .slot.filled {
+    background: var(--lav-soft);
+    border: 3px solid var(--lav);
+    border-style: solid;
+  }
+  .slot.correct { background: #EDF8DC; border-color: var(--green); }
+  .slot.incorrect { background: #FFE6E6; border-color: var(--coral); }
+  .slot-number {
+    position: absolute;
+    top: -10px;
+    right: -6px;
+    background: var(--lav);
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 50%;
+    font-weight: 900;
+  }
+
+  .pool-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .pool-item {
+    width: 52px;
+    height: 52px;
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.2s ease;
+  }
+  .pool-item:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--lav); }
+  .pool-item:disabled, .pool-item.used { opacity: 0.3; cursor: not-allowed; }
+
+  /* ===== POST-ROUND REVEAL ===== */
+  .round-result {
+    text-align: center;
+    padding: 20px 10px;
+  }
+  .round-result .result-emoji { font-size: 52px; margin-bottom: 6px; }
+  .round-result .result-title {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--lav-deep);
+    margin-bottom: 6px;
+  }
+  .round-result .result-sub {
+    font-size: 15px;
+    font-weight: 700;
+    color: #666;
+    margin-bottom: 16px;
+  }
+  .points-earned {
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+  .bonus-hits {
+    margin-bottom: 16px;
+  }
+  .bonus-hit {
+    display: inline-block;
+    background: var(--lav-soft);
+    color: var(--lav-deep);
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 900;
+    margin: 3px;
+  }
+  .next-btn {
+    padding: 14px 36px;
+    background: linear-gradient(135deg, var(--lav), #B8A8FF);
+    color: #fff;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 900;
+    box-shadow: 0 6px 18px rgba(165, 148, 249, 0.4);
+  }
+
+  /* ===== END SCREEN ===== */
+  .end-emoji { font-size: 64px; text-align: center; margin-bottom: 6px; line-height: 1; }
+  .end-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--lav-deep);
+    margin-bottom: 6px;
+  }
+  .end-sub {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #777;
+    margin-bottom: 22px;
+  }
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .stat-box {
+    background: #F5F5F5;
+    padding: 14px 8px;
+    border-radius: 14px;
+    text-align: center;
+  }
+  .stat-box .num { font-size: 22px; font-weight: 900; color: var(--dark); }
+  .stat-box .label {
+    font-size: 11px; font-weight: 800; color: #888;
+    letter-spacing: 1px; text-transform: uppercase; margin-top: 2px;
+  }
+  .bonus-list { margin-bottom: 18px; }
+  .bonus-item {
+    background: linear-gradient(90deg, var(--lav-soft), #E8DEFF);
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 14px;
+    color: var(--lav-deep);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .bonus-item .pts { color: var(--green); }
+  .end-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .end-actions button, .end-actions a {
+    padding: 12px 22px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 900;
+    transition: transform 0.15s ease;
+  }
+  .end-actions button:hover, .end-actions a:hover { transform: translateY(-2px); }
+  .btn-coral { background: var(--coral); color: #fff; }
+  .btn-purple { background: var(--purple); color: #fff; }
+  .btn-gray { background: #E5E5E5; color: var(--dark); }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 20px 14px 40px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .chooser h1 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand-link" href="/">
+      <span>🦉</span><span>Puzzle<span class="brand">Perch</span></span>
+    </a>
+    <div class="hud" id="hud" style="display:none;">
+      <div class="chip round"><span id="roundPill">Round 1 / 4</span></div>
+      <div class="chip">⭐ <span id="scorePill">0</span></div>
+      <button id="muteBtn" class="mute-btn" title="Toggle sound">🔊</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- CHOOSER -->
+  <section id="chooserScreen" class="screen active">
+    <div class="card chooser">
+      <h1>Memory Meadow 🌸</h1>
+      <div class="tagline">Four memory games. Random order. Surprise!</div>
+
+      <div class="howto">
+        <b>How it works:</b> You'll play 4 rounds. Each round is a random memory game - Simon Says, Memory Cards, Flash & Recall, or Sequence Memory. You won't know what's next until it appears!
+      </div>
+
+      <div class="section-label">Pick your difficulty</div>
+      <div class="diff-row">
+        <button class="diff-chip" data-d="easy"><span class="emoji">🌱</span><span>Easy</span></button>
+        <button class="diff-chip" data-d="medium"><span class="emoji">🔥</span><span>Medium</span></button>
+        <button class="diff-chip" data-d="hard"><span class="emoji">💎</span><span>Hard</span></button>
+      </div>
+
+      <button id="playBtn" class="play-btn" disabled>Pick a difficulty to start</button>
+    </div>
+  </section>
+
+  <!-- ROUND INTRO -->
+  <section id="introScreen" class="screen">
+    <div class="card round-intro">
+      <div class="big-emoji" id="introEmoji">🎵</div>
+      <div class="format-name" id="introName">Simon Says</div>
+      <div class="format-desc" id="introDesc"></div>
+      <button id="startRoundBtn" class="start-btn">Let's Go →</button>
+    </div>
+  </section>
+
+  <!-- GAME (reusable host) -->
+  <section id="gameScreen" class="screen">
+    <div class="card">
+      <div class="game-status">
+        <div id="gameStatusLeft">-</div>
+        <div class="timer" id="gameTimer">0.0s</div>
+      </div>
+      <div class="instruction" id="gameInstruction">-</div>
+      <div id="gameBody"></div>
+      <div class="submit-row" id="gameActions"></div>
+    </div>
+  </section>
+
+  <!-- POST-ROUND -->
+  <section id="resultScreen" class="screen">
+    <div class="card round-result">
+      <div class="result-emoji" id="resEmoji">🎉</div>
+      <div class="result-title" id="resTitle">Nice!</div>
+      <div class="result-sub" id="resSub">-</div>
+      <div class="points-earned" id="resPts">+0</div>
+      <div class="bonus-hits" id="resBonuses"></div>
+      <button id="nextBtn" class="next-btn">Next Round →</button>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section id="endScreen" class="screen">
+    <div class="card">
+      <div class="end-emoji" id="endEmoji">🎉</div>
+      <div class="end-title" id="endTitle">Sharp Mind!</div>
+      <div class="end-sub" id="endSub">Difficulty: Easy</div>
+
+      <div class="stats-row">
+        <div class="stat-box"><div class="num" id="statScore">0</div><div class="label">Score</div></div>
+        <div class="stat-box"><div class="num" id="statPassed">0/4</div><div class="label">Passed</div></div>
+        <div class="stat-box"><div class="num" id="statSpeed">0</div><div class="label">Speed Hits</div></div>
+      </div>
+
+      <div class="bonus-list" id="bonusList"></div>
+
+      <div class="end-actions">
+        <button id="playAgainBtn" class="btn-coral">Play Again</button>
+        <button id="shareBtn" class="btn-purple">Share 🚀</button>
+        <a href="/" class="btn-gray">Home</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const $ = (sel) => document.querySelector(sel);
+
+/* ============== GLOBAL STATE ============== */
+const state = {
+  difficulty: null,
+  rounds: [],
+  current: 0,
+  score: 0,
+  perRound: [],
+  muted: false,
+};
+
+/* ============== DIFFICULTY CONFIG (per format) ============== */
+const CFG = {
+  simon: {
+    easy:   { tiles: 4, seqMin: 3, seqMax: 5, flashMs: 700, gapMs: 200 },
+    medium: { tiles: 6, seqMin: 4, seqMax: 7, flashMs: 550, gapMs: 150 },
+    hard:   { tiles: 9, seqMin: 5, seqMax: 9, flashMs: 400, gapMs: 100 },
+  },
+  cards: {
+    easy:   { pairs: 4 },
+    medium: { pairs: 6 },
+    hard:   { pairs: 10 },
+  },
+  flash: {
+    easy:   { items: 4, viewMs: 5000, total: 8 },
+    medium: { items: 6, viewMs: 4000, total: 12 },
+    hard:   { items: 8, viewMs: 3000, total: 16 },
+  },
+  seq: {
+    easy:   { length: 5, viewStepMs: 600, finalHoldMs: 1500 },
+    medium: { length: 7, viewStepMs: 550, finalHoldMs: 1500 },
+    hard:   { length: 9, viewStepMs: 500, finalHoldMs: 1500 },
+  },
+  speedThresholdMs: { easy: 30000, medium: 45000, hard: 60000 },
+};
+
+const MEADOW_EMOJI = ["🌸","🌻","🦋","🐝","🌿","🍄","🐞","🦔","🌺","🌼","🐿️","🪻","🌹","🐛","🐌","🪷","🦉","🌷","🍃","🪲"];
+
+const FORMATS = {
+  simon: {
+    emoji: "🎵", name: "Simon Says",
+    desc: "Watch the sequence, then tap the tiles in the same order."
+  },
+  cards: {
+    emoji: "🃏", name: "Memory Cards",
+    desc: "Flip cards two at a time to find matching pairs. Fewer moves = better score!"
+  },
+  flash: {
+    emoji: "⚡", name: "Flash & Recall",
+    desc: "A grid of items will flash. Remember them, then pick them from a larger pool."
+  },
+  seq: {
+    emoji: "🔢", name: "Sequence Memory",
+    desc: "Memorize a sequence, then reproduce it in the correct order."
+  },
+};
+
+/* ============== SCREEN CONTROL ============== */
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+  $(`#${id}`).classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function updateHud() {
+  $("#scorePill").textContent = state.score;
+  $("#roundPill").textContent = `Round ${state.current + 1} / 4`;
+  $("#hud").style.display = state.rounds.length > 0 ? "flex" : "none";
+}
+
+/* ============== AUDIO ============== */
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch { audioCtx = null; }
+  }
+  return audioCtx;
+}
+function playTone(freq, durMs = 200) {
+  if (state.muted) return;
+  const ctx = getAudio();
+  if (!ctx) return;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.connect(g);
+  g.connect(ctx.destination);
+  o.frequency.value = freq;
+  o.type = "sine";
+  g.gain.setValueAtTime(0.0001, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + durMs / 1000);
+  o.start();
+  o.stop(ctx.currentTime + durMs / 1000 + 0.05);
+}
+const TILE_FREQS = [262, 330, 392, 494, 523, 587, 659, 784, 880];
+
+$("#muteBtn").addEventListener("click", () => {
+  state.muted = !state.muted;
+  $("#muteBtn").textContent = state.muted ? "🔇" : "🔊";
+});
+
+/* ============== TIMER ============== */
+let timerId = null;
+let timerStart = 0;
+function startTimer() {
+  timerStart = performance.now();
+  $("#gameTimer").textContent = "0.0s";
+  timerId = setInterval(() => {
+    const s = ((performance.now() - timerStart) / 1000).toFixed(1);
+    $("#gameTimer").textContent = `${s}s`;
+  }, 100);
+}
+function stopTimer() {
+  if (timerId) {
+    clearInterval(timerId);
+    timerId = null;
+  }
+  return performance.now() - timerStart;
+}
+
+/* ============== CHOOSER ============== */
+document.querySelectorAll(".diff-chip").forEach((chip) => {
+  chip.addEventListener("click", () => {
+    document.querySelectorAll(".diff-chip").forEach((c) => c.classList.remove("active"));
+    chip.classList.add("active");
+    state.difficulty = chip.dataset.d;
+    $("#playBtn").disabled = false;
+    $("#playBtn").textContent = "Let's Play! 🌸";
+  });
+});
+$("#playBtn").addEventListener("click", startSession);
+
+function shuffleFormats() {
+  const keys = ["simon", "cards", "flash", "seq"];
+  for (let i = keys.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [keys[i], keys[j]] = [keys[j], keys[i]];
+  }
+  return keys;
+}
+
+function startSession() {
+  if (!state.difficulty) return;
+  state.rounds = shuffleFormats().map((f) => ({ format: f }));
+  state.current = 0;
+  state.score = 0;
+  state.perRound = [];
+  updateHud();
+  showIntro();
+}
+
+/* ============== ROUND INTRO ============== */
+function showIntro() {
+  const fmt = state.rounds[state.current].format;
+  const meta = FORMATS[fmt];
+  $("#introEmoji").textContent = meta.emoji;
+  $("#introName").textContent = meta.name;
+  $("#introDesc").textContent = meta.desc;
+  updateHud();
+  showScreen("introScreen");
+}
+
+$("#startRoundBtn").addEventListener("click", () => {
+  const fmt = state.rounds[state.current].format;
+  if (fmt === "simon") startSimon();
+  else if (fmt === "cards") startCards();
+  else if (fmt === "flash") startFlash();
+  else if (fmt === "seq") startSeq();
+});
+
+/* ============== SHARED ROUND FINISH ============== */
+function finishRound({ passed, points, perfectRound, timeMs }) {
+  const threshold = CFG.speedThresholdMs[state.difficulty];
+  const speedBonus = passed && timeMs < threshold ? 20 : 0;
+  const totalPts = points + speedBonus;
+
+  state.score += totalPts;
+  state.perRound.push({
+    format: state.rounds[state.current].format,
+    passed,
+    basePoints: points,
+    speedBonus,
+    perfectRound,
+    points: totalPts,
+    timeMs,
+  });
+
+  const fmt = FORMATS[state.rounds[state.current].format];
+  if (passed && perfectRound) {
+    $("#resEmoji").textContent = "🌟";
+    $("#resTitle").textContent = "Perfect!";
+    $("#resSub").textContent = `${fmt.name} - flawless!`;
+  } else if (passed) {
+    $("#resEmoji").textContent = "✅";
+    $("#resTitle").textContent = "Nice work!";
+    $("#resSub").textContent = `${fmt.name} - you passed.`;
+  } else {
+    $("#resEmoji").textContent = "💔";
+    $("#resTitle").textContent = "Tough one!";
+    $("#resSub").textContent = `${fmt.name} - you'll get it next time.`;
+  }
+  $("#resPts").textContent = `+${totalPts} pts`;
+
+  const bonusHtml = [];
+  if (perfectRound) bonusHtml.push(`<span class="bonus-hit">🌟 Perfect Round</span>`);
+  if (speedBonus > 0) bonusHtml.push(`<span class="bonus-hit">🏎️ Speed +${speedBonus}</span>`);
+  $("#resBonuses").innerHTML = bonusHtml.join("");
+
+  updateHud();
+  $("#nextBtn").textContent = state.current + 1 < state.rounds.length ? "Next Round →" : "See Results →";
+  showScreen("resultScreen");
+}
+
+$("#nextBtn").addEventListener("click", () => {
+  if (state.current + 1 < state.rounds.length) {
+    state.current++;
+    showIntro();
+  } else {
+    finishSession();
+  }
+});
+
+/* ============================================
+ *  FORMAT 1: SIMON SAYS
+ * ============================================ */
+let simonState = null;
+
+function startSimon() {
+  const d = state.difficulty;
+  const cfg = CFG.simon[d];
+  const seqLen = cfg.seqMin + Math.floor(Math.random() * (cfg.seqMax - cfg.seqMin + 1));
+  const sequence = Array.from({ length: seqLen }, () => Math.floor(Math.random() * cfg.tiles));
+
+  simonState = {
+    cfg,
+    sequence,
+    userPos: 0,
+    phase: "watch",
+    mistakes: 0,
+    maxReached: 0,
+  };
+
+  $("#gameBody").innerHTML = `<div class="simon-grid size-${cfg.tiles}" id="simonGrid"></div>
+    <div class="simon-progress" id="simonProg">Sequence: 0 / ${seqLen}</div>`;
+  $("#gameActions").innerHTML = "";
+  $("#gameStatusLeft").textContent = "Simon Says";
+  $("#gameInstruction").textContent = "Watch carefully…";
+
+  const grid = $("#simonGrid");
+  for (let i = 0; i < cfg.tiles; i++) {
+    const tile = document.createElement("button");
+    tile.className = `simon-tile simon-t${i} disabled`;
+    tile.dataset.idx = i;
+    tile.addEventListener("click", () => onSimonTap(i));
+    grid.appendChild(tile);
+  }
+
+  showScreen("gameScreen");
+  setTimeout(() => flashSequence(), 600);
+}
+
+async function flashSequence() {
+  for (let i = 0; i < simonState.sequence.length; i++) {
+    await new Promise((r) => setTimeout(r, simonState.cfg.gapMs));
+    const idx = simonState.sequence[i];
+    const tile = document.querySelector(`.simon-tile[data-idx="${idx}"]`);
+    tile.classList.add("flash");
+    playTone(TILE_FREQS[idx], simonState.cfg.flashMs * 0.8);
+    await new Promise((r) => setTimeout(r, simonState.cfg.flashMs));
+    tile.classList.remove("flash");
+  }
+  simonState.phase = "play";
+  $("#gameInstruction").textContent = "Your turn!";
+  document.querySelectorAll(".simon-tile").forEach((t) => t.classList.remove("disabled"));
+  startTimer();
+}
+
+function onSimonTap(idx) {
+  if (simonState.phase !== "play") return;
+
+  const tile = document.querySelector(`.simon-tile[data-idx="${idx}"]`);
+  tile.classList.add("flash");
+  playTone(TILE_FREQS[idx], 200);
+  setTimeout(() => tile.classList.remove("flash"), 200);
+
+  const expected = simonState.sequence[simonState.userPos];
+  if (idx !== expected) {
+    simonState.phase = "done";
+    simonState.maxReached = simonState.userPos;
+    document.querySelectorAll(".simon-tile").forEach((t) => t.classList.add("disabled"));
+    const timeMs = stopTimer();
+    scoreSimonRound(timeMs);
+    return;
+  }
+
+  simonState.userPos++;
+  $("#simonProg").textContent = `Sequence: ${simonState.userPos} / ${simonState.sequence.length}`;
+
+  if (simonState.userPos === simonState.sequence.length) {
+    simonState.phase = "done";
+    simonState.maxReached = simonState.userPos;
+    document.querySelectorAll(".simon-tile").forEach((t) => t.classList.add("disabled"));
+    const timeMs = stopTimer();
+    scoreSimonRound(timeMs);
+  }
+}
+
+function scoreSimonRound(timeMs) {
+  const len = simonState.sequence.length;
+  const pct = simonState.maxReached / len;
+  let points;
+  let passed;
+  let perfect;
+
+  if (pct >= 1) { points = 100; passed = true; perfect = true; }
+  else if (pct >= 0.8) { points = 70; passed = true; perfect = false; }
+  else if (pct >= 0.5) { points = 50; passed = true; perfect = false; }
+  else { points = 0; passed = false; perfect = false; }
+
+  setTimeout(() => finishRound({ passed, points, perfectRound: perfect, timeMs }), 800);
+}
+
+/* ============================================
+ *  FORMAT 2: MEMORY CARDS
+ * ============================================ */
+let cardsState = null;
+
+function startCards() {
+  const d = state.difficulty;
+  const cfg = CFG.cards[d];
+  const pairs = cfg.pairs;
+
+  const pool = [...MEADOW_EMOJI].sort(() => Math.random() - 0.5).slice(0, pairs);
+  const deck = [];
+  pool.forEach((e) => {
+    deck.push(e);
+    deck.push(e);
+  });
+  deck.sort(() => Math.random() - 0.5);
+
+  cardsState = {
+    deck,
+    flipped: [],
+    matched: new Set(),
+    moves: 0,
+    totalPairs: pairs,
+  };
+
+  $("#gameStatusLeft").textContent = "Memory Cards";
+  $("#gameInstruction").textContent = "Find all pairs!";
+  const totalCards = pairs * 2;
+  $("#gameBody").innerHTML = `
+    <div class="cards-grid size-${totalCards}" id="cardsGrid"></div>
+    <div class="moves-count" id="movesCount">Moves: 0</div>
+  `;
+  $("#gameActions").innerHTML = "";
+
+  const grid = $("#cardsGrid");
+  deck.forEach((emoji, i) => {
+    const c = document.createElement("div");
+    c.className = "mem-card";
+    c.dataset.idx = i;
+    c.innerHTML = `<span class="back-icon">❓</span>`;
+    c.addEventListener("click", () => onCardClick(i));
+    grid.appendChild(c);
+  });
+
+  showScreen("gameScreen");
+  startTimer();
+}
+
+function onCardClick(idx) {
+  if (cardsState.matched.has(idx)) return;
+  if (cardsState.flipped.includes(idx)) return;
+  if (cardsState.flipped.length >= 2) return;
+
+  const card = document.querySelector(`.mem-card[data-idx="${idx}"]`);
+  card.classList.add("flipped");
+  card.textContent = cardsState.deck[idx];
+  cardsState.flipped.push(idx);
+  playTone(TILE_FREQS[idx % TILE_FREQS.length], 100);
+
+  if (cardsState.flipped.length === 2) {
+    cardsState.moves++;
+    $("#movesCount").textContent = `Moves: ${cardsState.moves}`;
+    const [a, b] = cardsState.flipped;
+    if (cardsState.deck[a] === cardsState.deck[b]) {
+      setTimeout(() => {
+        document.querySelector(`.mem-card[data-idx="${a}"]`).classList.add("matched");
+        document.querySelector(`.mem-card[data-idx="${b}"]`).classList.add("matched");
+        cardsState.matched.add(a);
+        cardsState.matched.add(b);
+        cardsState.flipped = [];
+        playTone(880, 150);
+        setTimeout(() => playTone(1100, 150), 80);
+        if (cardsState.matched.size === cardsState.deck.length) {
+          finishCardsRound();
+        }
+      }, 350);
+    } else {
+      setTimeout(() => {
+        const ca = document.querySelector(`.mem-card[data-idx="${a}"]`);
+        const cb = document.querySelector(`.mem-card[data-idx="${b}"]`);
+        ca.classList.remove("flipped");
+        cb.classList.remove("flipped");
+        ca.innerHTML = `<span class="back-icon">❓</span>`;
+        cb.innerHTML = `<span class="back-icon">❓</span>`;
+        cardsState.flipped = [];
+      }, 800);
+    }
+  }
+}
+
+function finishCardsRound() {
+  const timeMs = stopTimer();
+  const efficiency = cardsState.totalPairs / cardsState.moves;
+  let points;
+  let passed;
+  let perfect;
+  if (efficiency >= 0.9) { points = 100; passed = true; perfect = efficiency === 1; }
+  else if (efficiency >= 0.7) { points = 70; passed = true; perfect = false; }
+  else if (efficiency >= 0.5) { points = 50; passed = true; perfect = false; }
+  else { points = 30; passed = true; perfect = false; }
+
+  setTimeout(() => finishRound({ passed, points, perfectRound: perfect, timeMs }), 700);
+}
+
+/* ============================================
+ *  FORMAT 3: FLASH & RECALL
+ * ============================================ */
+let flashState = null;
+
+function startFlash() {
+  const d = state.difficulty;
+  const cfg = CFG.flash[d];
+
+  const pool = [...MEADOW_EMOJI].sort(() => Math.random() - 0.5).slice(0, cfg.total);
+  const shown = [...pool].sort(() => Math.random() - 0.5).slice(0, cfg.items);
+  const shownSet = new Set(shown);
+
+  flashState = {
+    cfg,
+    pool,
+    shown,
+    shownSet,
+    selected: new Set(),
+    phase: "view",
+  };
+
+  $("#gameStatusLeft").textContent = "Flash & Recall";
+  $("#gameInstruction").textContent = `Memorize these ${cfg.items} items…`;
+  $("#gameBody").innerHTML = `
+    <div class="flash-grid show-${cfg.items}" id="flashGrid"></div>
+    <div class="countdown-bar"><div class="countdown-bar-fill" id="cdBar"></div></div>
+  `;
+  $("#gameActions").innerHTML = "";
+
+  const grid = $("#flashGrid");
+  shown.forEach((e) => {
+    const item = document.createElement("div");
+    item.className = "flash-item";
+    item.textContent = e;
+    grid.appendChild(item);
+  });
+
+  showScreen("gameScreen");
+
+  const bar = $("#cdBar");
+  setTimeout(() => {
+    bar.style.transition = `width ${cfg.viewMs}ms linear`;
+    bar.style.width = "0%";
+  }, 50);
+
+  setTimeout(() => {
+    transitionToPick();
+  }, cfg.viewMs);
+}
+
+function transitionToPick() {
+  flashState.phase = "pick";
+  const cfg = flashState.cfg;
+  $("#gameInstruction").textContent = `Pick the ${cfg.items} you saw:`;
+  startTimer();
+
+  $("#gameBody").innerHTML = `<div class="pick-grid opt-${cfg.total}" id="pickGrid"></div>`;
+  $("#gameActions").innerHTML = `<button class="submit-btn" id="pickSubmit" disabled>Submit (0 / ${cfg.items})</button>`;
+
+  const grid = $("#pickGrid");
+  flashState.pool.sort(() => Math.random() - 0.5).forEach((e) => {
+    const item = document.createElement("div");
+    item.className = "pick-item";
+    item.textContent = e;
+    item.dataset.emoji = e;
+    item.addEventListener("click", () => togglePick(item, e));
+    grid.appendChild(item);
+  });
+
+  $("#pickSubmit").addEventListener("click", submitPick);
+}
+
+function togglePick(el, emoji) {
+  if (flashState.phase !== "pick") return;
+  if (flashState.selected.has(emoji)) {
+    flashState.selected.delete(emoji);
+    el.classList.remove("selected");
+  } else {
+    if (flashState.selected.size >= flashState.cfg.items) return;
+    flashState.selected.add(emoji);
+    el.classList.add("selected");
+    playTone(500 + Math.random() * 200, 60);
+  }
+  const sub = $("#pickSubmit");
+  sub.textContent = `Submit (${flashState.selected.size} / ${flashState.cfg.items})`;
+  sub.disabled = flashState.selected.size !== flashState.cfg.items;
+}
+
+function submitPick() {
+  const timeMs = stopTimer();
+  flashState.phase = "done";
+
+  let correct = 0;
+  document.querySelectorAll(".pick-item").forEach((el) => {
+    const em = el.dataset.emoji;
+    const picked = flashState.selected.has(em);
+    const wasShown = flashState.shownSet.has(em);
+    el.classList.remove("selected");
+    el.classList.add("revealed");
+    if (picked && wasShown) { el.classList.add("correct"); correct++; }
+    else if (picked && !wasShown) el.classList.add("incorrect");
+    else if (!picked && wasShown) el.classList.add("missed");
+  });
+  $("#pickSubmit").disabled = true;
+
+  const N = flashState.cfg.items;
+  const diff = N - correct;
+  let points;
+  let passed;
+  let perfect;
+  if (diff === 0) { points = 100; passed = true; perfect = true; }
+  else if (diff === 1) { points = 70; passed = true; perfect = false; }
+  else if (diff === 2) { points = 40; passed = true; perfect = false; }
+  else { points = 0; passed = false; perfect = false; }
+
+  setTimeout(() => finishRound({ passed, points, perfectRound: perfect, timeMs }), 1400);
+}
+
+/* ============================================
+ *  FORMAT 4: SEQUENCE MEMORY
+ * ============================================ */
+let seqState = null;
+
+function startSeq() {
+  const d = state.difficulty;
+  const cfg = CFG.seq[d];
+  const len = cfg.length;
+
+  const available = [...MEADOW_EMOJI].sort(() => Math.random() - 0.5);
+  const sequence = available.slice(0, len);
+  const extras = available.slice(len, len + Math.max(3, Math.floor(len / 2)));
+  const pool = [...sequence, ...extras].sort(() => Math.random() - 0.5);
+
+  seqState = {
+    cfg,
+    sequence,
+    pool,
+    slots: new Array(len).fill(null),
+    usedPool: new Set(),
+    phase: "view",
+  };
+
+  $("#gameStatusLeft").textContent = "Sequence Memory";
+  $("#gameInstruction").textContent = "Memorize the order…";
+  $("#gameBody").innerHTML = `<div class="sequence-display" id="seqDisplay"></div>`;
+  $("#gameActions").innerHTML = "";
+
+  showScreen("gameScreen");
+  displaySequence();
+}
+
+async function displaySequence() {
+  const display = $("#seqDisplay");
+  const cfg = seqState.cfg;
+  for (let i = 0; i < seqState.sequence.length; i++) {
+    const item = document.createElement("div");
+    item.className = "seq-item";
+    item.textContent = seqState.sequence[i];
+    display.appendChild(item);
+    playTone(TILE_FREQS[i % TILE_FREQS.length], 150);
+    await new Promise((r) => setTimeout(r, cfg.viewStepMs));
+  }
+  await new Promise((r) => setTimeout(r, cfg.finalHoldMs));
+  transitionToRecall();
+}
+
+function transitionToRecall() {
+  seqState.phase = "recall";
+  $("#gameInstruction").textContent = "Now tap them in the same order:";
+  const len = seqState.sequence.length;
+  $("#gameBody").innerHTML = `
+    <div class="slots-row" id="slotsRow"></div>
+    <div class="pool-row" id="poolRow"></div>
+  `;
+  $("#gameActions").innerHTML = `<button class="submit-btn" id="seqSubmit" disabled>Submit (0 / ${len})</button>`;
+
+  const slotsRow = $("#slotsRow");
+  for (let i = 0; i < len; i++) {
+    const s = document.createElement("div");
+    s.className = "slot";
+    s.dataset.idx = i;
+    s.addEventListener("click", () => onSlotClick(i));
+    slotsRow.appendChild(s);
+  }
+
+  const poolRow = $("#poolRow");
+  seqState.pool.forEach((e, i) => {
+    const p = document.createElement("button");
+    p.className = "pool-item";
+    p.textContent = e;
+    p.dataset.pidx = i;
+    p.addEventListener("click", () => onPoolClick(i));
+    poolRow.appendChild(p);
+  });
+
+  $("#seqSubmit").addEventListener("click", submitSeq);
+  startTimer();
+}
+
+function onPoolClick(pidx) {
+  if (seqState.phase !== "recall") return;
+  if (seqState.usedPool.has(pidx)) return;
+  const firstEmpty = seqState.slots.findIndex((s) => s === null);
+  if (firstEmpty === -1) return;
+  const emoji = seqState.pool[pidx];
+  seqState.slots[firstEmpty] = { emoji, pidx };
+  seqState.usedPool.add(pidx);
+  refreshSeqUI();
+  playTone(600 + Math.random() * 200, 80);
+}
+
+function onSlotClick(sidx) {
+  if (seqState.phase !== "recall") return;
+  const entry = seqState.slots[sidx];
+  if (!entry) return;
+  seqState.slots[sidx] = null;
+  seqState.usedPool.delete(entry.pidx);
+  refreshSeqUI();
+}
+
+function refreshSeqUI() {
+  seqState.slots.forEach((entry, i) => {
+    const el = document.querySelector(`.slot[data-idx="${i}"]`);
+    if (entry) {
+      el.textContent = entry.emoji;
+      el.classList.add("filled");
+    } else {
+      el.textContent = "";
+      el.classList.remove("filled");
+    }
+  });
+  document.querySelectorAll(".pool-item").forEach((el) => {
+    if (seqState.usedPool.has(Number(el.dataset.pidx))) el.classList.add("used");
+    else el.classList.remove("used");
+  });
+  const filledCount = seqState.slots.filter((s) => s !== null).length;
+  const sub = $("#seqSubmit");
+  sub.textContent = `Submit (${filledCount} / ${seqState.sequence.length})`;
+  sub.disabled = filledCount !== seqState.sequence.length;
+}
+
+function submitSeq() {
+  const timeMs = stopTimer();
+  seqState.phase = "done";
+  let correctPos = 0;
+  seqState.slots.forEach((entry, i) => {
+    const el = document.querySelector(`.slot[data-idx="${i}"]`);
+    if (entry && entry.emoji === seqState.sequence[i]) {
+      el.classList.add("correct");
+      correctPos++;
+    } else {
+      el.classList.add("incorrect");
+    }
+  });
+  $("#seqSubmit").disabled = true;
+
+  const N = seqState.sequence.length;
+  const diff = N - correctPos;
+  let points;
+  let passed;
+  let perfect;
+  if (diff === 0) { points = 100; passed = true; perfect = true; }
+  else if (diff === 1) { points = 70; passed = true; perfect = false; }
+  else if (diff === 2) { points = 40; passed = true; perfect = false; }
+  else { points = 0; passed = false; perfect = false; }
+
+  setTimeout(() => finishRound({ passed, points, perfectRound: perfect, timeMs }), 1400);
+}
+
+/* ============== END SESSION ============== */
+function finishSession() {
+  const passedCount = state.perRound.filter((r) => r.passed).length;
+  const perfectCount = state.perRound.filter((r) => r.perfectRound).length;
+  const speedHits = state.perRound.filter((r) => r.speedBonus > 0).length;
+
+  const bonuses = [];
+
+  if (passedCount === 4) {
+    state.score += 50;
+    bonuses.push({ label: "🔥 All 4 Passed!", pts: 50 });
+  }
+  if (perfectCount === 4) {
+    state.score += 100;
+    bonuses.push({ label: "👑 Perfect Session!", pts: 100 });
+  }
+  if (speedHits === 4) {
+    state.score += 50;
+    bonuses.push({ label: "🏎️ Speed Demon!", pts: 50 });
+  }
+
+  let bonusHtml = "";
+  bonuses.forEach((b) => {
+    bonusHtml += `<div class="bonus-item"><span>${b.label}</span><span class="pts">+${b.pts}</span></div>`;
+  });
+  $("#bonusList").innerHTML = bonusHtml;
+
+  const s = state.score;
+  let title;
+  let emoji;
+  if (perfectCount === 4 && speedHits === 4) { title = "Pure Brain Power!"; emoji = "🧠"; }
+  else if (s >= 400) { title = "Sharp Mind!"; emoji = "🦉"; }
+  else if (s >= 200) { title = "Good Thinking!"; emoji = "💡"; }
+  else { title = "Keep Practicing!"; emoji = "💪"; }
+
+  const diffLabel = state.difficulty.charAt(0).toUpperCase() + state.difficulty.slice(1);
+  $("#endEmoji").textContent = emoji;
+  $("#endTitle").textContent = title;
+  $("#endSub").textContent = `Difficulty: ${diffLabel}`;
+  $("#statScore").textContent = state.score;
+  $("#statPassed").textContent = `${passedCount}/4`;
+  $("#statSpeed").textContent = `${speedHits}/4`;
+  $("#hud").style.display = "none";
+  showScreen("endScreen");
+}
+
+$("#playAgainBtn").addEventListener("click", () => {
+  state.difficulty = null;
+  state.rounds = [];
+  document.querySelectorAll(".diff-chip").forEach((c) => c.classList.remove("active"));
+  $("#playBtn").disabled = true;
+  $("#playBtn").textContent = "Pick a difficulty to start";
+  showScreen("chooserScreen");
+});
+
+$("#shareBtn").addEventListener("click", async () => {
+  const diff = state.difficulty.charAt(0).toUpperCase() + state.difficulty.slice(1);
+  const passedCount = state.perRound.filter((r) => r.passed).length;
+  const text = `I scored ${state.score} on Memory Meadow!\nDifficulty: ${diff} | Passed: ${passedCount}/4\nTrain your brain at puzzleperch.com 🌸🦉`;
+  try {
+    if (navigator.share) await navigator.share({ text, title: "Memory Meadow" });
+    else {
+      await navigator.clipboard.writeText(text);
+      $("#shareBtn").textContent = "Copied!";
+      setTimeout(() => $("#shareBtn").textContent = "Share 🚀", 1500);
+    }
+  } catch (e) {
+  }
+});
+</script>
+</body>
+</html>
