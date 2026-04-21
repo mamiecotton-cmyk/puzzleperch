@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>Lateral Lounge · PuzzlePerch</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --amber: #F5A623;
+    --amber-soft: #FFD98A;
+    --amber-deep: #C47A00;
+    --amber-bg: #FFF6E3;
+    --green: #8CC63F;
+    --purple: #6B4BF6;
+    --coral: #FF6B6B;
+    --dark: #1A1A2E;
+    --gray: #F5F5F5;
+    --shadow-card: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    color: var(--dark);
+    background: linear-gradient(180deg, var(--amber-bg) 0%, #fff 40%);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button { font-family: inherit; cursor: pointer; border: none; font-weight: 800; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ===== NAV ===== */
+  .nav {
+    background: #fff;
+    border-bottom: 1px solid #eee;
+  }
+  .nav-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--purple);
+  }
+  .brand-link .brand { color: var(--dark); }
+  .hud {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hud .chip {
+    background: var(--amber-soft);
+    color: var(--amber-deep);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-weight: 900;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hud .chip.round {
+    background: #EDE8FF;
+    color: var(--purple);
+  }
+
+  /* ===== LAYOUT ===== */
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 36px 28px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== CHOOSER ===== */
+  .chooser h1 {
+    font-size: 40px;
+    font-weight: 900;
+    color: var(--amber-deep);
+    text-align: center;
+    margin-bottom: 8px;
+    line-height: 1.1;
+  }
+  .chooser .tagline {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #666;
+    margin-bottom: 28px;
+  }
+  .section-label {
+    font-size: 13px;
+    font-weight: 900;
+    color: #888;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .diff-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .diff-chip {
+    background: #F5F5F5;
+    color: var(--dark);
+    padding: 14px 8px;
+    border-radius: 16px;
+    font-weight: 900;
+    font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+    border: 3px solid transparent;
+  }
+  .diff-chip .emoji { font-size: 22px; }
+  .diff-chip:hover { transform: translateY(-2px); }
+  .diff-chip.active {
+    background: var(--amber-soft);
+    color: var(--amber-deep);
+    border-color: var(--amber);
+    box-shadow: 0 6px 16px rgba(245, 166, 35, 0.25);
+  }
+  .play-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--amber), #FFB94F);
+    color: #fff;
+    border-radius: 50px;
+    font-size: 17px;
+    font-weight: 900;
+    box-shadow: 0 6px 20px rgba(245, 166, 35, 0.4);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+  }
+  .play-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(245, 166, 35, 0.5); }
+  .play-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .howto {
+    background: var(--amber-bg);
+    border-left: 4px solid var(--amber);
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1.5;
+  }
+  .howto b { color: var(--amber-deep); }
+
+  /* ===== LOADING ===== */
+  .loading { text-align: center; padding: 40px 20px; }
+  .owl-spinner {
+    font-size: 64px;
+    margin-bottom: 12px;
+    display: inline-block;
+    animation: owlSpin 2.5s ease-in-out infinite;
+  }
+  @keyframes owlSpin {
+    0%, 100% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+  }
+  .loading-text {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--amber-deep);
+  }
+
+  /* ===== RIDDLE PLAY ===== */
+  .riddle-card .scenario {
+    background: var(--amber-bg);
+    border-left: 5px solid var(--amber);
+    padding: 20px 22px;
+    border-radius: 12px;
+    font-size: 17px;
+    line-height: 1.55;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 22px;
+  }
+
+  .answer-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .answer-input {
+    flex: 1;
+    padding: 14px 16px;
+    border: 2px solid #ddd;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark);
+    outline: none;
+    transition: border-color 0.2s ease;
+    background: #fff;
+  }
+  .answer-input:focus { border-color: var(--amber); }
+  .submit-btn {
+    padding: 14px 22px;
+    background: var(--purple);
+    color: #fff;
+    border-radius: 14px;
+    font-weight: 900;
+    font-size: 15px;
+    transition: transform 0.15s ease, background 0.2s ease;
+  }
+  .submit-btn:hover { background: #5a3be0; transform: translateY(-2px); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .attempt-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: #777;
+    margin-bottom: 16px;
+  }
+  .attempt-row .hint-btn {
+    background: #fff;
+    color: var(--amber-deep);
+    border: 2px solid var(--amber-soft);
+    padding: 7px 14px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 900;
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .attempt-row .hint-btn:hover { background: var(--amber-soft); transform: translateY(-1px); }
+  .attempt-row .hint-btn:disabled { opacity: 0.5; cursor: not-allowed; border-color: #ddd; color: #aaa; }
+
+  .hints-list {
+    background: #fffbef;
+    border: 2px dashed var(--amber-soft);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .hints-list.show { display: block; }
+  .hints-list .hint-item {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--amber-deep);
+    padding: 4px 0;
+    line-height: 1.4;
+  }
+
+  .feedback {
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    font-weight: 800;
+    font-size: 15px;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.wrong {
+    background: #FFE6E6;
+    color: #C43030;
+    border-left: 4px solid var(--coral);
+  }
+  .feedback.right {
+    background: #EDF8DC;
+    color: #5A8A1A;
+    border-left: 4px solid var(--green);
+  }
+
+  /* Multiple choice */
+  .mc-section { display: none; }
+  .mc-section.show { display: block; }
+  .mc-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: #666;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .mc-options {
+    display: grid;
+    gap: 10px;
+  }
+  .mc-option {
+    background: #fff;
+    color: var(--dark);
+    border: 2px solid #e0e0e0;
+    padding: 14px 16px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: left;
+    line-height: 1.4;
+    transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+  .mc-option:hover {
+    border-color: var(--amber);
+    background: var(--amber-bg);
+    transform: translateY(-2px);
+  }
+  .mc-option:disabled { cursor: not-allowed; transform: none; }
+  .mc-option.correct {
+    background: #EDF8DC;
+    border-color: var(--green);
+    color: #4A7A0A;
+  }
+  .mc-option.incorrect {
+    background: #FFE6E6;
+    border-color: var(--coral);
+    color: #C43030;
+  }
+
+  /* Reveal / next */
+  .reveal-section { display: none; }
+  .reveal-section.show { display: block; }
+  .reveal-card {
+    background: #EDE8FF;
+    border-left: 5px solid var(--purple);
+    padding: 18px 20px;
+    border-radius: 12px;
+    margin-bottom: 18px;
+  }
+  .reveal-label {
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--purple);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .reveal-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1.5;
+  }
+  .points-earned {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--amber-deep);
+    margin-bottom: 14px;
+  }
+  .points-earned .delta { color: var(--green); }
+  .points-earned .delta.zero { color: #999; }
+
+  .next-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--amber), #FFB94F);
+    color: #fff;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 900;
+    box-shadow: 0 6px 20px rgba(245, 166, 35, 0.4);
+    transition: transform 0.15s ease;
+  }
+  .next-btn:hover { transform: translateY(-2px); }
+
+  /* ===== END SCREEN ===== */
+  .end-emoji { font-size: 64px; text-align: center; margin-bottom: 6px; line-height: 1; }
+  .end-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--amber-deep);
+    margin-bottom: 6px;
+  }
+  .end-sub {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #777;
+    margin-bottom: 22px;
+  }
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .stat-box {
+    background: #F5F5F5;
+    padding: 14px 8px;
+    border-radius: 14px;
+    text-align: center;
+  }
+  .stat-box .num {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--dark);
+  }
+  .stat-box .label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #888;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .bonus-list {
+    margin-bottom: 18px;
+  }
+  .bonus-item {
+    background: linear-gradient(90deg, var(--amber-soft), #FFE9BF);
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 14px;
+    color: var(--amber-deep);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .bonus-item .pts { color: var(--green); }
+  .end-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .end-actions button, .end-actions a {
+    padding: 12px 22px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 900;
+    transition: transform 0.15s ease;
+  }
+  .end-actions button:hover, .end-actions a:hover { transform: translateY(-2px); }
+  .btn-coral {
+    background: var(--coral);
+    color: #fff;
+  }
+  .btn-purple {
+    background: var(--purple);
+    color: #fff;
+  }
+  .btn-gray {
+    background: #E5E5E5;
+    color: var(--dark);
+  }
+
+  /* ===== ERROR ===== */
+  .error-screen { text-align: center; padding: 20px 10px; }
+  .error-emoji { font-size: 56px; margin-bottom: 8px; }
+  .error-title {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--coral);
+    margin-bottom: 6px;
+  }
+  .error-sub {
+    font-size: 14px;
+    font-weight: 700;
+    color: #666;
+    margin-bottom: 18px;
+  }
+  .error-actions {
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 20px 14px 40px; }
+    .card { padding: 24px 18px; border-radius: 18px; }
+    .chooser h1 { font-size: 32px; }
+    .riddle-card .scenario { font-size: 15px; padding: 16px 18px; }
+    .answer-row { flex-direction: column; }
+    .submit-btn { width: 100%; }
+    .stats-row .num { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand-link" href="/">
+      <span>🦉</span><span>Puzzle<span class="brand">Perch</span></span>
+    </a>
+    <div class="hud" id="hud" style="display:none;">
+      <div class="chip round"><span id="roundPill">Riddle 1 / 3</span></div>
+      <div class="chip">⭐ <span id="scorePill">0</span></div>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- CHOOSER -->
+  <section id="chooserScreen" class="screen active">
+    <div class="card chooser">
+      <h1>Lateral Lounge 🛋️</h1>
+      <div class="tagline">Think sideways. Solve the twist.</div>
+
+      <div class="howto">
+        <b>How it works:</b> You'll get 3 riddles. Type what you think the answer is — if it contains the right idea, you win. Stuck? Tap <b>💡 Hint</b> for a nudge. Two misses and we'll give you four choices to pick from.
+      </div>
+
+      <div class="section-label">Pick your difficulty</div>
+      <div class="diff-row">
+        <button class="diff-chip" data-d="easy"><span class="emoji">🌱</span><span>Easy</span></button>
+        <button class="diff-chip" data-d="medium"><span class="emoji">🔥</span><span>Medium</span></button>
+        <button class="diff-chip" data-d="hard"><span class="emoji">💎</span><span>Hard</span></button>
+      </div>
+
+      <button id="playBtn" class="play-btn" disabled>Pick a difficulty to start</button>
+    </div>
+  </section>
+
+  <!-- LOADING -->
+  <section id="loadingScreen" class="screen">
+    <div class="card loading">
+      <div class="owl-spinner">🦉</div>
+      <div class="loading-text">Percy is dreaming up riddles…</div>
+    </div>
+  </section>
+
+  <!-- RIDDLE -->
+  <section id="riddleScreen" class="screen">
+    <div class="card riddle-card">
+      <div class="scenario" id="scenarioText"></div>
+
+      <div id="hintsList" class="hints-list"></div>
+
+      <div id="feedback" class="feedback"></div>
+
+      <div id="inputSection">
+        <div class="answer-row">
+          <input type="text" id="answerInput" class="answer-input" placeholder="Type your answer…" autocomplete="off" />
+          <button id="submitBtn" class="submit-btn">Submit</button>
+        </div>
+        <div class="attempt-row">
+          <span id="attemptLabel">Attempt 1 of 2</span>
+          <button id="hintBtn" class="hint-btn">💡 Hint (<span id="hintsLeft">3</span> left · <span id="hintCost">-5</span> pts)</button>
+        </div>
+      </div>
+
+      <div id="mcSection" class="mc-section">
+        <div class="mc-label">Not quite — pick the closest answer:</div>
+        <div class="mc-options" id="mcOptions"></div>
+      </div>
+
+      <div id="revealSection" class="reveal-section">
+        <div class="reveal-card">
+          <div class="reveal-label">The Answer</div>
+          <div class="reveal-text" id="revealText"></div>
+        </div>
+        <div class="points-earned" id="pointsEarned"></div>
+        <button id="nextBtn" class="next-btn">Next Riddle →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section id="endScreen" class="screen">
+    <div class="card">
+      <div class="end-emoji" id="endEmoji">🎉</div>
+      <div class="end-title" id="endTitle">Sharp Mind!</div>
+      <div class="end-sub" id="endSub">Difficulty: Easy</div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="num" id="statScore">0</div>
+          <div class="label">Score</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="statSolved">0/3</div>
+          <div class="label">Solved</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="statHints">0</div>
+          <div class="label">Hints</div>
+        </div>
+      </div>
+
+      <div class="bonus-list" id="bonusList"></div>
+
+      <div class="end-actions">
+        <button id="playAgainBtn" class="btn-coral">Play Again</button>
+        <button id="shareBtn" class="btn-purple">Share 🚀</button>
+        <a href="/" class="btn-gray">Home</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ERROR -->
+  <section id="errorScreen" class="screen">
+    <div class="card error-screen">
+      <div class="error-emoji">😣</div>
+      <div class="error-title">Percy's stuck mid-dream.</div>
+      <div class="error-sub">It's not you — it's us. Give it another go!</div>
+      <div class="error-actions">
+        <button id="tryAgainBtn" class="btn-coral">Try Again</button>
+        <a href="/" class="btn-gray">← Home</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const $ = (sel) => document.querySelector(sel);
+
+/* ============== STATE ============== */
+const state = {
+  difficulty: null,
+  riddles: [],          // array from API
+  current: 0,           // index of current riddle
+  score: 0,             // running session score
+  solvedCount: 0,
+  hintsTotalUsed: 0,
+  perRiddle: [],        // [{solved, firstTry, hintsUsed, points}]
+  // per-riddle runtime
+  attemptsUsed: 0,
+  hintsUsed: 0,
+  mcActive: false,
+  locked: false,        // input disabled after correct/reveal
+};
+
+/* ============== DIFFICULTY CONFIG ============== */
+const DIFF_CONFIG = {
+  easy:   { hintsAvail: 3, hintCost: 5,  label: 'Easy',   emoji: '🌱' },
+  medium: { hintsAvail: 2, hintCost: 10, label: 'Medium', emoji: '🔥' },
+  hard:   { hintsAvail: 1, hintCost: 15, label: 'Hard',   emoji: '💎' },
+};
+
+/* ============== SCREEN CONTROL ============== */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(`#${id}`).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateHud() {
+  $('#scorePill').textContent = state.score;
+  $('#roundPill').textContent = `Riddle ${state.current + 1} / ${state.riddles.length}`;
+  $('#hud').style.display = state.riddles.length > 0 ? 'flex' : 'none';
+}
+
+/* ============== CHOOSER ============== */
+document.querySelectorAll('.diff-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.diff-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    state.difficulty = chip.dataset.d;
+    const btn = $('#playBtn');
+    btn.disabled = false;
+    btn.textContent = `Let's Play! ${DIFF_CONFIG[state.difficulty].emoji}`;
+  });
+});
+
+$('#playBtn').addEventListener('click', startGame);
+$('#tryAgainBtn').addEventListener('click', startGame);
+
+async function startGame() {
+  if (!state.difficulty) return;
+  // reset state but keep difficulty
+  state.riddles = [];
+  state.current = 0;
+  state.score = 0;
+  state.solvedCount = 0;
+  state.hintsTotalUsed = 0;
+  state.perRiddle = [];
+
+  showScreen('loadingScreen');
+
+  try {
+    const res = await fetch('/api/generate-riddles', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ difficulty: state.difficulty }),
+    });
+    if (!res.ok) throw new Error('bad response');
+    const data = await res.json();
+    if (!data.riddles || data.riddles.length < 3) throw new Error('malformed');
+    state.riddles = data.riddles;
+    updateHud();
+    loadRiddle(0);
+  } catch (e) {
+    console.error(e);
+    showScreen('errorScreen');
+  }
+}
+
+/* ============== RIDDLE LOAD ============== */
+function loadRiddle(idx) {
+  state.current = idx;
+  state.attemptsUsed = 0;
+  state.hintsUsed = 0;
+  state.mcActive = false;
+  state.locked = false;
+
+  const r = state.riddles[idx];
+  const cfg = DIFF_CONFIG[state.difficulty];
+
+  $('#scenarioText').textContent = r.scenario;
+
+  // reset input
+  $('#answerInput').value = '';
+  $('#answerInput').disabled = false;
+  $('#submitBtn').disabled = false;
+  $('#inputSection').style.display = 'block';
+  $('#attemptLabel').textContent = `Attempt 1 of 2`;
+
+  // reset hints UI
+  $('#hintsLeft').textContent = cfg.hintsAvail;
+  $('#hintCost').textContent = `-${cfg.hintCost}`;
+  $('#hintBtn').disabled = cfg.hintsAvail === 0;
+  $('#hintsList').innerHTML = '';
+  $('#hintsList').classList.remove('show');
+
+  // reset feedback, mc, reveal
+  $('#feedback').className = 'feedback';
+  $('#feedback').textContent = '';
+  $('#mcSection').classList.remove('show');
+  $('#mcOptions').innerHTML = '';
+  $('#revealSection').classList.remove('show');
+
+  updateHud();
+  showScreen('riddleScreen');
+  setTimeout(() => $('#answerInput').focus(), 300);
+}
+
+/* ============== MATCHING LOGIC ============== */
+function normalize(s) {
+  return (s || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+// Levenshtein-lite: allow small typos in a single word
+function fuzzyIncludes(haystack, needle) {
+  if (!needle) return false;
+  if (haystack.includes(needle)) return true;
+  // if needle >= 5 chars, allow 1-char typo via simple check
+  if (needle.length >= 5) {
+    for (let i = 0; i < needle.length; i++) {
+      const variant = needle.slice(0, i) + needle.slice(i + 1);
+      if (haystack.includes(variant)) return true;
+    }
+  }
+  return false;
+}
+
+function checkAnswer(userInput, riddle) {
+  const normInput = normalize(userInput);
+  if (!normInput) return false;
+
+  // 1. Keyword match (single word anywhere in input)
+  for (const kw of (riddle.keywords || [])) {
+    if (fuzzyIncludes(normInput, kw)) return true;
+  }
+
+  // 2. Accepted-answer match (whole phrase fuzzy match)
+  for (const accepted of (riddle.acceptedAnswers || [])) {
+    const normAcc = normalize(accepted);
+    if (!normAcc) continue;
+    // If the input contains every word of the accepted phrase, count it.
+    const words = normAcc.split(' ').filter(w => w.length >= 3);
+    if (words.length === 0) continue;
+    const allMatch = words.every(w => fuzzyIncludes(normInput, w));
+    if (allMatch) return true;
+  }
+
+  return false;
+}
+
+/* ============== SUBMIT ============== */
+$('#submitBtn').addEventListener('click', onSubmit);
+$('#answerInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') onSubmit();
+});
+
+function onSubmit() {
+  if (state.locked) return;
+  const input = $('#answerInput').value;
+  if (!input.trim()) return;
+
+  const riddle = state.riddles[state.current];
+  const correct = checkAnswer(input, riddle);
+
+  if (correct) {
+    const pts = state.attemptsUsed === 0 ? 100 : 70;
+    finalizeRiddle(true, false, pts, state.attemptsUsed === 0);
+    return;
+  }
+
+  // wrong
+  state.attemptsUsed++;
+  if (state.attemptsUsed >= 2) {
+    // move to multiple choice
+    showWrong("Not quite. Let's try multiple choice.");
+    setTimeout(() => showMultipleChoice(riddle), 400);
+  } else {
+    showWrong('Not quite. One more free-text attempt.');
+    $('#attemptLabel').textContent = `Attempt 2 of 2`;
+    $('#answerInput').value = '';
+    $('#answerInput').focus();
+  }
+}
+
+function showWrong(msg) {
+  const fb = $('#feedback');
+  fb.className = 'feedback wrong show';
+  fb.textContent = msg;
+}
+
+function showRight(msg) {
+  const fb = $('#feedback');
+  fb.className = 'feedback right show';
+  fb.textContent = msg;
+}
+
+/* ============== HINTS ============== */
+$('#hintBtn').addEventListener('click', () => {
+  if (state.locked) return;
+  const cfg = DIFF_CONFIG[state.difficulty];
+  if (state.hintsUsed >= cfg.hintsAvail) return;
+
+  const riddle = state.riddles[state.current];
+  const hint = riddle.hints[state.hintsUsed] || 'Keep thinking…';
+
+  state.hintsUsed++;
+  state.hintsTotalUsed++;
+  state.score = Math.max(0, state.score - cfg.hintCost);
+  updateHud();
+
+  const list = $('#hintsList');
+  const div = document.createElement('div');
+  div.className = 'hint-item';
+  div.textContent = `💡 ${hint}`;
+  list.appendChild(div);
+  list.classList.add('show');
+
+  $('#hintsLeft').textContent = cfg.hintsAvail - state.hintsUsed;
+  if (state.hintsUsed >= cfg.hintsAvail) {
+    $('#hintBtn').disabled = true;
+  }
+});
+
+/* ============== MULTIPLE CHOICE ============== */
+function showMultipleChoice(riddle) {
+  state.mcActive = true;
+  $('#inputSection').style.display = 'none';
+
+  const options = [
+    { text: riddle.answer, correct: true },
+    ...riddle.decoys.map(d => ({ text: d, correct: false })),
+  ];
+  // shuffle
+  for (let i = options.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [options[i], options[j]] = [options[j], options[i]];
+  }
+
+  const wrap = $('#mcOptions');
+  wrap.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'mc-option';
+    btn.textContent = opt.text;
+    btn.addEventListener('click', () => onMcPick(btn, opt, options, wrap));
+    wrap.appendChild(btn);
+  });
+  $('#mcSection').classList.add('show');
+}
+
+function onMcPick(btn, opt, allOpts, wrap) {
+  if (state.locked) return;
+  state.locked = true;
+
+  // disable all + highlight correct/wrong
+  wrap.querySelectorAll('.mc-option').forEach(b => b.disabled = true);
+  if (opt.correct) {
+    btn.classList.add('correct');
+    finalizeRiddle(true, true, 40, false);
+  } else {
+    btn.classList.add('incorrect');
+    // also show which was right
+    wrap.querySelectorAll('.mc-option').forEach(b => {
+      if (b.textContent === state.riddles[state.current].answer) {
+        b.classList.add('correct');
+      }
+    });
+    finalizeRiddle(false, true, 0, false);
+  }
+}
+
+/* ============== FINALIZE ============== */
+function finalizeRiddle(solved, viaMc, basePoints, firstTry) {
+  state.locked = true;
+  $('#answerInput').disabled = true;
+  $('#submitBtn').disabled = true;
+
+  const riddle = state.riddles[state.current];
+  let earned = basePoints;
+  const hintFreeBonus = solved && state.hintsUsed === 0 && !viaMc ? 20 : 0;
+  earned += hintFreeBonus;
+
+  state.score += earned;
+  if (solved) state.solvedCount++;
+
+  state.perRiddle.push({
+    solved,
+    viaMc,
+    firstTry: !!firstTry,
+    hintsUsed: state.hintsUsed,
+    basePoints,
+    hintFreeBonus,
+    earned,
+  });
+
+  // reveal UI
+  $('#revealText').textContent = riddle.answer;
+  const pe = $('#pointsEarned');
+  if (earned > 0) {
+    pe.innerHTML = `<span class="delta">+${earned} pts</span>` + (hintFreeBonus > 0 ? ` <small style="font-size:14px;color:#888;">(+${hintFreeBonus} hint-free bonus)</small>` : '');
+  } else {
+    pe.innerHTML = `<span class="delta zero">+0 pts</span>`;
+  }
+  $('#revealSection').classList.add('show');
+
+  if (solved && !viaMc) {
+    showRight(firstTry ? '🎉 Nailed it! First try!' : '✅ Got it on attempt two!');
+  } else if (solved && viaMc) {
+    showRight('✅ Good recovery!');
+  } else {
+    showWrong('Better luck on the next one.');
+  }
+
+  updateHud();
+  const btn = $('#nextBtn');
+  btn.textContent = (state.current + 1 < state.riddles.length) ? 'Next Riddle →' : 'See Results →';
+}
+
+$('#nextBtn').addEventListener('click', () => {
+  if (state.current + 1 < state.riddles.length) {
+    loadRiddle(state.current + 1);
+  } else {
+    finishSession();
+  }
+});
+
+/* ============== END SESSION ============== */
+function finishSession() {
+  // bonuses
+  const all3Solved = state.solvedCount === state.riddles.length;
+  const perfectSession = state.perRiddle.every(p => p.solved && !p.viaMc && p.firstTry && p.hintsUsed === 0);
+
+  let bonusHtml = '';
+  const bonuses = [];
+
+  // hint-free bonus already added per riddle, so just list them:
+  const hintFreeCount = state.perRiddle.filter(p => p.hintFreeBonus > 0).length;
+  if (hintFreeCount > 0) {
+    bonuses.push({ label: `🏆 Hint-Free (${hintFreeCount}×)`, pts: hintFreeCount * 20, already: true });
+  }
+
+  if (all3Solved) {
+    state.score += 50;
+    bonuses.push({ label: '🔥 3-in-a-Row!', pts: 50 });
+  }
+  if (perfectSession) {
+    state.score += 100;
+    bonuses.push({ label: '👑 Perfect Session!', pts: 100 });
+  }
+
+  bonuses.forEach(b => {
+    bonusHtml += `<div class="bonus-item"><span>${b.label}${b.already ? ' (earned)' : ''}</span><span class="pts">+${b.pts}</span></div>`;
+  });
+  $('#bonusList').innerHTML = bonusHtml;
+
+  // tier
+  const score = state.score;
+  let title, emoji;
+  if (perfectSession) { title = 'Pure Brain Power!'; emoji = '🧠'; }
+  else if (score >= 210) { title = 'Sharp Mind!'; emoji = '🦉'; }
+  else if (score >= 120) { title = 'Good Thinking!'; emoji = '💡'; }
+  else { title = 'Keep Practicing!'; emoji = '💪'; }
+
+  $('#endEmoji').textContent = emoji;
+  $('#endTitle').textContent = title;
+  $('#endSub').textContent = `Difficulty: ${DIFF_CONFIG[state.difficulty].label}`;
+  $('#statScore').textContent = state.score;
+  $('#statSolved').textContent = `${state.solvedCount}/${state.riddles.length}`;
+  $('#statHints').textContent = state.hintsTotalUsed;
+
+  $('#hud').style.display = 'none';
+  showScreen('endScreen');
+}
+
+$('#playAgainBtn').addEventListener('click', () => {
+  // back to chooser
+  state.difficulty = null;
+  state.riddles = [];
+  document.querySelectorAll('.diff-chip').forEach(c => c.classList.remove('active'));
+  $('#playBtn').disabled = true;
+  $('#playBtn').textContent = 'Pick a difficulty to start';
+  showScreen('chooserScreen');
+});
+
+$('#shareBtn').addEventListener('click', async () => {
+  const diff = DIFF_CONFIG[state.difficulty].label;
+  const text = `I scored ${state.score} on Lateral Lounge!\nDifficulty: ${diff} | Solved: ${state.solvedCount}/${state.riddles.length}\nHints used: ${state.hintsTotalUsed}\nOut-think me at puzzleperch.com 🛋️🦉`;
+  try {
+    if (navigator.share) {
+      await navigator.share({ text, title: 'Lateral Lounge' });
+    } else {
+      await navigator.clipboard.writeText(text);
+      $('#shareBtn').textContent = 'Copied!';
+      setTimeout(() => $('#shareBtn').textContent = 'Share 🚀', 1500);
+    }
+  } catch (e) { /* user cancelled */ }
+});
+
+</script>
+</body>
+</html>
