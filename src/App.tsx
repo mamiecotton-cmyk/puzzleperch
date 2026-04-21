@@ -123,9 +123,9 @@ function App() {
         </div>
       </section>
 
-      {/* FEATURED GAMES — Word Perch + Logic Lagoon */}
+      {/* FEATURED GAMES — Word Perch + Logic Lagoon + Lateral Lounge */}
       <section className="featured-section" id="games">
-        <div className="featured-grid">
+        <div className="featured-grid featured-grid-3">
           {/* Word Perch */}
           <a className="card highlighted" href="/word-perch.html" style={{ cursor: 'pointer' }}>
             <div className="card-title">Word Perch</div>
@@ -157,6 +157,24 @@ function App() {
               <span className="tag">Logic Grid</span>
             </div>
             <div className="badge-bottom badge-teal">Dive In!</div>
+          </a>
+
+          {/* Lateral Lounge */}
+          <a className="card lounge" href="/lateral-lounge.html" style={{ cursor: 'pointer' }}>
+            <div className="card-title">Lateral Lounge</div>
+            <div className="card-preview preview-lounge">
+              <span>🛋️</span>
+              <span className="lounge-bubble">💭</span>
+            </div>
+            <div className="card-meta lounge-desc">
+              Think sideways — solve the twist in daily riddles
+            </div>
+            <div className="card-tags">
+              <span className="tag new">New</span>
+              <span className="tag">Riddles</span>
+              <span className="tag">Lateral</span>
+            </div>
+            <div className="badge-bottom badge-amber">Think Sideways!</div>
           </a>
         </div>
       </section>
