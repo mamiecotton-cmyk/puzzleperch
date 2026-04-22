@@ -8,6 +8,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+<!-- Shared stats module -->
+<script type="module">
+  import * as PPStats from '/pp-stats.js';
+  window.ppStats = PPStats;
+  window.dispatchEvent(new Event('pp-stats-ready'));
+</script>
 <style>
   :root {
     --bg: #F8FDFF;
@@ -116,6 +123,41 @@
   }
   .btn-start:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(0,180,216,0.5); }
   .btn-start:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .stats-chip {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 14px 0 0;
+    flex-wrap: wrap;
+    font-size: 13px;
+    font-weight: 800;
+    color: #666;
+  }
+  .stats-chip .s-item {
+    background: #F5F5F5;
+    padding: 6px 14px;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stats-chip .s-item.highlight {
+    background: #E0F4F8;
+    color: #006d8a;
+  }
+  .stats-chip:empty { display: none; }
+  .new-best-banner {
+    background: linear-gradient(90deg, #FFD23F, #FFB94F);
+    color: #6B4100;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 14px;
+    text-align: center;
+    margin: 0 auto 14px;
+    max-width: 320px;
+  }
 
   .game-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -446,6 +488,7 @@
 
     <div class="start-btn-wrap">
       <button class="btn-start" id="startBtn" disabled>Let's Solve It!</button>
+      <div class="stats-chip" id="chooserStats"></div>
     </div>
   </section>
 
@@ -481,6 +524,7 @@
       <div class="end-emoji" id="endEmoji">🎉</div>
       <div class="end-title" id="endTitle">Solved!</div>
       <div class="end-sub" id="endSub">Nice deduction!</div>
+      <div id="newBestBanner" class="new-best-banner" style="display:none;">🌟 NEW BEST SCORE!</div>
 
       <div class="end-stats" id="endStats">
         <div class="end-stat"><div class="end-stat-num" id="finalScore">0</div><div class="end-stat-label">Score</div></div>
@@ -550,6 +594,25 @@
     toast._h = setTimeout(() => t.classList.remove('show'), 1800);
   }
 
+  function renderChooserStats() {
+    const el = $('chooserStats');
+    if (!el || !window.ppStats) return;
+    const gs = window.ppStats.getGameStats('logicLagoon');
+    const streak = window.ppStats.getSharedStreak();
+    const parts = [];
+    if (gs && gs.bestScore > 0) {
+      parts.push('<span class="s-item highlight">⭐ Best: ' + gs.bestScore + '</span>');
+    }
+    if (streak && streak.current > 0) {
+      parts.push('<span class="s-item">🔥 ' + streak.current + '-day streak</span>');
+    }
+    if (gs && gs.humanLastPlayed && gs.humanLastPlayed !== 'Never') {
+      parts.push('<span class="s-item">🕒 ' + gs.humanLastPlayed + '</span>');
+    }
+    el.innerHTML = parts.join('');
+  }
+  window.addEventListener('pp-stats-ready', renderChooserStats);
+
   function getSeen() {
     try { return JSON.parse(localStorage.getItem(SEEN_KEY) || '{}') || {}; }
     catch { return {}; }
@@ -617,8 +680,8 @@
       }
       if (itemHits.length !== 1) continue;
       const person = peopleHit[0];
-      const { cat, item } = itemHits[0];
-      if (p.solution[person][cat] === item) {
+      const pair = itemHits[0];
+      if (p.solution[person][pair.cat] === pair.item) {
         console.warn('Logic Lagoon: clue contradicts solution in', p.id, '—', clue);
         return false;
       }
@@ -804,9 +867,12 @@
       changed = false;
       for (let a = 0; a < axes.length; a++) {
         for (let b = a + 1; b < axes.length; b++) {
-          const A = axes[a].items, B = axes[b].items;
+          const A = axes[a].items;
+          const B = axes[b].items;
           for (const ia of A) {
-            let yes = null, blanks = [], noCount = 0;
+            let yes = null;
+            const blanks = [];
+            let noCount = 0;
             for (const ib of B) {
               const v = state.cells[pairKey(a, b)][ia][ib];
               if (isYes(v)) yes = ib;
@@ -823,7 +889,9 @@
             }
           }
           for (const ib of B) {
-            let yes = null, blanks = [], noCount = 0;
+            let yes = null;
+            const blanks = [];
+            let noCount = 0;
             for (const ia of A) {
               const v = state.cells[pairKey(a, b)][ia][ib];
               if (isYes(v)) yes = ia;
@@ -1049,7 +1117,7 @@
     const list = escaped.length === 1 ? escaped[0]
       : escaped.slice(0, -1).join(', ') + ' and ' + last;
     const themeLine = theme ? (' in the tale of <b>' + escHtml(theme) + '</b>') : '';
-    return 'Here\'s how it all came together' + themeLine + ' — ' + list + ' each had a story to tell.';
+    return 'Here\\'s how it all came together' + themeLine + ' — ' + list + ' each had a story to tell.';
   }
   function pickCloser(n) {
     if (n <= 3) return 'Mystery solved! 🌊🦉';
@@ -1073,15 +1141,15 @@
     return lead + ' ' + body + '.';
   }
   function escHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+    return String(s).replace(/[&<>\"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;' }[c]));
   }
   function renderStory(p) {
     const el = $('storyNote');
-    const { opener, sentences, closer } = buildStory(p);
+    const built = buildStory(p);
     let html = '<span class="story-title">📖 The Story</span>';
-    html += '<p class="opener">' + opener + '</p>';
-    sentences.forEach(s => { html += '<p>' + s + '</p>'; });
-    html += '<p class="closer">' + escHtml(closer) + '</p>';
+    html += '<p class="opener">' + built.opener + '</p>';
+    built.sentences.forEach(s => { html += '<p>' + s + '</p>'; });
+    html += '<p class="closer">' + escHtml(built.closer) + '</p>';
     el.innerHTML = html;
     el.hidden = false;
     el.scrollTop = 0;
@@ -1089,6 +1157,23 @@
 
   function showResult(won, finalScore) {
     show('result');
+
+    const banner = $('newBestBanner');
+    if (won && window.ppStats) {
+      const result = window.ppStats.recordSession('logicLagoon', finalScore);
+      if (result && result.newBest && finalScore > 0) {
+        const prev = result.previousBest || 0;
+        banner.innerHTML = prev > 0
+          ? '🌟 NEW BEST SCORE! (Previous: ' + prev + ')'
+          : '🌟 NEW BEST SCORE!';
+        banner.style.display = 'block';
+      } else {
+        banner.style.display = 'none';
+      }
+    } else {
+      banner.style.display = 'none';
+    }
+
     const card = $('endCard');
     card.classList.toggle('shake', !won);
     $('endEmoji').textContent = won ? '🎉' : '🤔';
@@ -1168,10 +1253,10 @@
 
   function shareResult(finalScore) {
     const diffLabel = state.difficulty.toUpperCase();
-    const txt = "I solved Logic Lagoon in " + fmtTime(state.secs) + "\n"
-      + "using " + state.hintsUsed + " hints!\n"
-      + "Difficulty: " + diffLabel + "\n"
-      + "Score: " + finalScore + "\n"
+    const txt = "I solved Logic Lagoon in " + fmtTime(state.secs) + "\\n"
+      + "using " + state.hintsUsed + " hints!\\n"
+      + "Difficulty: " + diffLabel + "\\n"
+      + "Score: " + finalScore + "\\n"
       + "Can you beat me? puzzleperch.com 🦉";
     if (navigator.share) {
       navigator.share({ text: txt }).catch(() => copyText(txt));
@@ -1255,12 +1340,15 @@
   $('hintBtn').addEventListener('click', onHint);
   $('submitBtn').addEventListener('click', onSubmit);
 
+  renderChooserStats();
+
   fetch('/data/puzzles-logic.json', { cache: 'no-store' })
     .then(r => r.json())
     .then(bank => {
       state.bank = validateBank(bank);
       const counts = ['easy','medium','hard'].map(k => k + ':' + state.bank[k].length).join(' / ');
       console.log('Logic Lagoon bank loaded —', counts);
+      renderChooserStats();
     })
     .catch(err => {
       console.error('Logic Lagoon: failed to load puzzles', err);

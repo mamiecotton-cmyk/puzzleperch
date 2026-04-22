@@ -8,6 +8,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+
+<!-- Shared stats module -->
+<script type="module">
+  import * as PPStats from '/pp-stats.js';
+  window.ppStats = PPStats;
+  window.dispatchEvent(new Event('pp-stats-ready'));
+</script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -37,7 +44,6 @@
   button { font-family: inherit; cursor: pointer; border: none; font-weight: 800; }
   a { color: inherit; text-decoration: none; }
 
-  /* ===== NAV ===== */
   .nav {
     background: #fff;
     border-bottom: 1px solid #eee;
@@ -80,7 +86,6 @@
     color: var(--purple);
   }
 
-  /* ===== LAYOUT ===== */
   .wrap {
     max-width: 720px;
     margin: 0 auto;
@@ -102,7 +107,6 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* ===== CHOOSER ===== */
   .chooser h1 {
     font-size: 40px;
     font-weight: 900;
@@ -169,6 +173,41 @@
   .play-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(245, 166, 35, 0.5); }
   .play-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+  .stats-chip {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 14px 0 0;
+    flex-wrap: wrap;
+    font-size: 13px;
+    font-weight: 800;
+    color: #666;
+  }
+  .stats-chip .s-item {
+    background: #F5F5F5;
+    padding: 6px 14px;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stats-chip .s-item.highlight {
+    background: var(--amber-soft);
+    color: var(--amber-deep);
+  }
+  .stats-chip:empty { display: none; }
+  .new-best-banner {
+    background: linear-gradient(90deg, #FFD23F, #FFB94F);
+    color: #6B4100;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 14px;
+    text-align: center;
+    margin: 0 auto 14px;
+    max-width: 320px;
+  }
+
   .howto {
     background: var(--amber-bg);
     border-left: 4px solid var(--amber);
@@ -182,7 +221,6 @@
   }
   .howto b { color: var(--amber-deep); }
 
-  /* ===== LOADING ===== */
   .loading { text-align: center; padding: 40px 20px; }
   .owl-spinner {
     font-size: 64px;
@@ -200,7 +238,6 @@
     color: var(--amber-deep);
   }
 
-  /* ===== RIDDLE PLAY ===== */
   .riddle-card .scenario {
     background: var(--amber-bg);
     border-left: 5px solid var(--amber);
@@ -303,7 +340,6 @@
     border-left: 4px solid var(--green);
   }
 
-  /* Multiple choice */
   .mc-section { display: none; }
   .mc-section.show { display: block; }
   .mc-label {
@@ -346,7 +382,6 @@
     color: #C43030;
   }
 
-  /* Reveal / next */
   .reveal-section { display: none; }
   .reveal-section.show { display: block; }
   .reveal-card {
@@ -393,7 +428,6 @@
   }
   .next-btn:hover { transform: translateY(-2px); }
 
-  /* ===== END SCREEN ===== */
   .end-emoji { font-size: 64px; text-align: center; margin-bottom: 6px; line-height: 1; }
   .end-title {
     text-align: center;
@@ -477,7 +511,6 @@
     color: var(--dark);
   }
 
-  /* ===== ERROR ===== */
   .error-screen { text-align: center; padding: 20px 10px; }
   .error-emoji { font-size: 56px; margin-bottom: 8px; }
   .error-title {
@@ -526,7 +559,6 @@
 
 <main class="wrap">
 
-  <!-- CHOOSER -->
   <section id="chooserScreen" class="screen active">
     <div class="card chooser">
       <h1>Lateral Lounge 🛋️</h1>
@@ -544,10 +576,10 @@
       </div>
 
       <button id="playBtn" class="play-btn" disabled>Pick a difficulty to start</button>
+      <div class="stats-chip" id="chooserStats"></div>
     </div>
   </section>
 
-  <!-- LOADING -->
   <section id="loadingScreen" class="screen">
     <div class="card loading">
       <div class="owl-spinner">🦉</div>
@@ -555,7 +587,6 @@
     </div>
   </section>
 
-  <!-- RIDDLE -->
   <section id="riddleScreen" class="screen">
     <div class="card riddle-card">
       <div class="scenario" id="scenarioText"></div>
@@ -591,12 +622,13 @@
     </div>
   </section>
 
-  <!-- END -->
   <section id="endScreen" class="screen">
     <div class="card">
       <div class="end-emoji" id="endEmoji">🎉</div>
       <div class="end-title" id="endTitle">Sharp Mind!</div>
       <div class="end-sub" id="endSub">Difficulty: Easy</div>
+
+      <div id="newBestBanner" class="new-best-banner" style="display:none;">🌟 NEW BEST SCORE!</div>
 
       <div class="stats-row">
         <div class="stat-box">
@@ -623,7 +655,6 @@
     </div>
   </section>
 
-  <!-- ERROR -->
   <section id="errorScreen" class="screen">
     <div class="card error-screen">
       <div class="error-emoji">😣</div>
@@ -641,30 +672,26 @@
 <script>
 const $ = (sel) => document.querySelector(sel);
 
-/* ============== STATE ============== */
 const state = {
   difficulty: null,
-  riddles: [],          // array from API
-  current: 0,           // index of current riddle
-  score: 0,             // running session score
+  riddles: [],
+  current: 0,
+  score: 0,
   solvedCount: 0,
   hintsTotalUsed: 0,
-  perRiddle: [],        // [{solved, firstTry, hintsUsed, points}]
-  // per-riddle runtime
+  perRiddle: [],
   attemptsUsed: 0,
   hintsUsed: 0,
   mcActive: false,
-  locked: false,        // input disabled after correct/reveal
+  locked: false,
 };
 
-/* ============== DIFFICULTY CONFIG ============== */
 const DIFF_CONFIG = {
   easy:   { hintsAvail: 3, hintCost: 5,  label: 'Easy',   emoji: '🌱' },
   medium: { hintsAvail: 2, hintCost: 10, label: 'Medium', emoji: '🔥' },
   hard:   { hintsAvail: 1, hintCost: 15, label: 'Hard',   emoji: '💎' },
 };
 
-/* ============== SCREEN CONTROL ============== */
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   $(`#${id}`).classList.add('active');
@@ -677,7 +704,25 @@ function updateHud() {
   $('#hud').style.display = state.riddles.length > 0 ? 'flex' : 'none';
 }
 
-/* ============== CHOOSER ============== */
+function renderChooserStats() {
+  const el = $('#chooserStats');
+  if (!el || !window.ppStats) return;
+  const gs = window.ppStats.getGameStats('lateralLounge');
+  const streak = window.ppStats.getSharedStreak();
+  const parts = [];
+  if (gs && gs.bestScore > 0) {
+    parts.push(`<span class="s-item highlight">⭐ Best: ${gs.bestScore}</span>`);
+  }
+  if (streak && streak.current > 0) {
+    parts.push(`<span class="s-item">🔥 ${streak.current}-day streak</span>`);
+  }
+  if (gs && gs.humanLastPlayed && gs.humanLastPlayed !== 'Never') {
+    parts.push(`<span class="s-item">🕒 ${gs.humanLastPlayed}</span>`);
+  }
+  el.innerHTML = parts.join('');
+}
+window.addEventListener('pp-stats-ready', renderChooserStats);
+
 document.querySelectorAll('.diff-chip').forEach(chip => {
   chip.addEventListener('click', () => {
     document.querySelectorAll('.diff-chip').forEach(c => c.classList.remove('active'));
@@ -694,7 +739,6 @@ $('#tryAgainBtn').addEventListener('click', startGame);
 
 async function startGame() {
   if (!state.difficulty) return;
-  // reset state but keep difficulty
   state.riddles = [];
   state.current = 0;
   state.score = 0;
@@ -722,7 +766,6 @@ async function startGame() {
   }
 }
 
-/* ============== RIDDLE LOAD ============== */
 function loadRiddle(idx) {
   state.current = idx;
   state.attemptsUsed = 0;
@@ -735,21 +778,18 @@ function loadRiddle(idx) {
 
   $('#scenarioText').textContent = r.scenario;
 
-  // reset input
   $('#answerInput').value = '';
   $('#answerInput').disabled = false;
   $('#submitBtn').disabled = false;
   $('#inputSection').style.display = 'block';
   $('#attemptLabel').textContent = `Attempt 1 of 2`;
 
-  // reset hints UI
   $('#hintsLeft').textContent = cfg.hintsAvail;
   $('#hintCost').textContent = `-${cfg.hintCost}`;
   $('#hintBtn').disabled = cfg.hintsAvail === 0;
   $('#hintsList').innerHTML = '';
   $('#hintsList').classList.remove('show');
 
-  // reset feedback, mc, reveal
   $('#feedback').className = 'feedback';
   $('#feedback').textContent = '';
   $('#mcSection').classList.remove('show');
@@ -761,16 +801,13 @@ function loadRiddle(idx) {
   setTimeout(() => $('#answerInput').focus(), 300);
 }
 
-/* ============== MATCHING LOGIC ============== */
 function normalize(s) {
   return (s || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
 }
 
-// Levenshtein-lite: allow small typos in a single word
 function fuzzyIncludes(haystack, needle) {
   if (!needle) return false;
   if (haystack.includes(needle)) return true;
-  // if needle >= 5 chars, allow 1-char typo via simple check
   if (needle.length >= 5) {
     for (let i = 0; i < needle.length; i++) {
       const variant = needle.slice(0, i) + needle.slice(i + 1);
@@ -784,16 +821,13 @@ function checkAnswer(userInput, riddle) {
   const normInput = normalize(userInput);
   if (!normInput) return false;
 
-  // 1. Keyword match (single word anywhere in input)
   for (const kw of (riddle.keywords || [])) {
     if (fuzzyIncludes(normInput, kw)) return true;
   }
 
-  // 2. Accepted-answer match (whole phrase fuzzy match)
   for (const accepted of (riddle.acceptedAnswers || [])) {
     const normAcc = normalize(accepted);
     if (!normAcc) continue;
-    // If the input contains every word of the accepted phrase, count it.
     const words = normAcc.split(' ').filter(w => w.length >= 3);
     if (words.length === 0) continue;
     const allMatch = words.every(w => fuzzyIncludes(normInput, w));
@@ -803,7 +837,6 @@ function checkAnswer(userInput, riddle) {
   return false;
 }
 
-/* ============== SUBMIT ============== */
 $('#submitBtn').addEventListener('click', onSubmit);
 $('#answerInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') onSubmit();
@@ -823,10 +856,8 @@ function onSubmit() {
     return;
   }
 
-  // wrong
   state.attemptsUsed++;
   if (state.attemptsUsed >= 2) {
-    // move to multiple choice
     showWrong("Not quite. Let's try multiple choice.");
     setTimeout(() => showMultipleChoice(riddle), 400);
   } else {
@@ -849,7 +880,6 @@ function showRight(msg) {
   fb.textContent = msg;
 }
 
-/* ============== HINTS ============== */
 $('#hintBtn').addEventListener('click', () => {
   if (state.locked) return;
   const cfg = DIFF_CONFIG[state.difficulty];
@@ -876,7 +906,6 @@ $('#hintBtn').addEventListener('click', () => {
   }
 });
 
-/* ============== MULTIPLE CHOICE ============== */
 function showMultipleChoice(riddle) {
   state.mcActive = true;
   $('#inputSection').style.display = 'none';
@@ -885,7 +914,6 @@ function showMultipleChoice(riddle) {
     { text: riddle.answer, correct: true },
     ...riddle.decoys.map(d => ({ text: d, correct: false })),
   ];
-  // shuffle
   for (let i = options.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [options[i], options[j]] = [options[j], options[i]];
@@ -907,14 +935,12 @@ function onMcPick(btn, opt, allOpts, wrap) {
   if (state.locked) return;
   state.locked = true;
 
-  // disable all + highlight correct/wrong
   wrap.querySelectorAll('.mc-option').forEach(b => b.disabled = true);
   if (opt.correct) {
     btn.classList.add('correct');
     finalizeRiddle(true, true, 40, false);
   } else {
     btn.classList.add('incorrect');
-    // also show which was right
     wrap.querySelectorAll('.mc-option').forEach(b => {
       if (b.textContent === state.riddles[state.current].answer) {
         b.classList.add('correct');
@@ -924,7 +950,6 @@ function onMcPick(btn, opt, allOpts, wrap) {
   }
 }
 
-/* ============== FINALIZE ============== */
 function finalizeRiddle(solved, viaMc, basePoints, firstTry) {
   state.locked = true;
   $('#answerInput').disabled = true;
@@ -948,7 +973,6 @@ function finalizeRiddle(solved, viaMc, basePoints, firstTry) {
     earned,
   });
 
-  // reveal UI
   $('#revealText').textContent = riddle.answer;
   const pe = $('#pointsEarned');
   if (earned > 0) {
@@ -979,16 +1003,13 @@ $('#nextBtn').addEventListener('click', () => {
   }
 });
 
-/* ============== END SESSION ============== */
 function finishSession() {
-  // bonuses
   const all3Solved = state.solvedCount === state.riddles.length;
   const perfectSession = state.perRiddle.every(p => p.solved && !p.viaMc && p.firstTry && p.hintsUsed === 0);
 
   let bonusHtml = '';
   const bonuses = [];
 
-  // hint-free bonus already added per riddle, so just list them:
   const hintFreeCount = state.perRiddle.filter(p => p.hintFreeBonus > 0).length;
   if (hintFreeCount > 0) {
     bonuses.push({ label: `🏆 Hint-Free (${hintFreeCount}×)`, pts: hintFreeCount * 20, already: true });
@@ -1008,9 +1029,9 @@ function finishSession() {
   });
   $('#bonusList').innerHTML = bonusHtml;
 
-  // tier
   const score = state.score;
-  let title, emoji;
+  let title;
+  let emoji;
   if (perfectSession) { title = 'Pure Brain Power!'; emoji = '🧠'; }
   else if (score >= 210) { title = 'Sharp Mind!'; emoji = '🦉'; }
   else if (score >= 120) { title = 'Good Thinking!'; emoji = '💡'; }
@@ -1023,17 +1044,33 @@ function finishSession() {
   $('#statSolved').textContent = `${state.solvedCount}/${state.riddles.length}`;
   $('#statHints').textContent = state.hintsTotalUsed;
 
+  const banner = $('#newBestBanner');
+  if (window.ppStats) {
+    const result = window.ppStats.recordSession('lateralLounge', state.score);
+    if (result && result.newBest && state.score > 0) {
+      const prev = result.previousBest || 0;
+      banner.innerHTML = prev > 0
+        ? `🌟 NEW BEST SCORE! (Previous: ${prev})`
+        : '🌟 NEW BEST SCORE!';
+      banner.style.display = 'block';
+    } else {
+      banner.style.display = 'none';
+    }
+  } else {
+    banner.style.display = 'none';
+  }
+
   $('#hud').style.display = 'none';
   showScreen('endScreen');
 }
 
 $('#playAgainBtn').addEventListener('click', () => {
-  // back to chooser
   state.difficulty = null;
   state.riddles = [];
   document.querySelectorAll('.diff-chip').forEach(c => c.classList.remove('active'));
   $('#playBtn').disabled = true;
   $('#playBtn').textContent = 'Pick a difficulty to start';
+  renderChooserStats();
   showScreen('chooserScreen');
 });
 
@@ -1048,8 +1085,10 @@ $('#shareBtn').addEventListener('click', async () => {
       $('#shareBtn').textContent = 'Copied!';
       setTimeout(() => $('#shareBtn').textContent = 'Share 🚀', 1500);
     }
-  } catch (e) { /* user cancelled */ }
+  } catch (e) {}
 });
+
+renderChooserStats();
 
 </script>
 </body>
