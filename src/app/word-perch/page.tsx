@@ -122,7 +122,7 @@ export default function WordPerchRedesign() {
           </aside>
         </section>
 
-        <section className="mt-8 grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
+        <section className="mt-8">
           <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
               <div>
@@ -160,23 +160,6 @@ export default function WordPerchRedesign() {
                   <div className="text-lg font-extrabold">{item.name}</div>
                   <div className="mt-1 text-sm text-white/50">Fast round • 3–5 min</div>
                 </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-            <div className="text-sm uppercase tracking-[0.22em] text-white/45">Why it hits harder</div>
-            <h3 className="mt-1 text-2xl font-black">More original than "clean but generic"</h3>
-            <div className="mt-5 space-y-4">
-              {[
-                'A game-select screen that feels like a destination, not a form.',
-                'Color and lighting build personality without copying Lumosity\'s polished-flat look.',
-                'Challenge, streak, and category choices are visible at once, so the page has momentum.',
-                'The player immediately sees why they should tap now.'
-              ].map((point) => (
-                <div key={point} className="rounded-2xl border border-white/10 bg-[#0b1626]/90 p-4 text-sm leading-7 text-white/75">
-                  {point}
-                </div>
               ))}
             </div>
           </div>
