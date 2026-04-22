@@ -8,6 +8,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+
+<!-- Load shared stats as a module and expose on window for the game script below -->
+<script type="module">
+  import * as PPStats from '/pp-stats.js';
+  window.ppStats = PPStats;
+  window.dispatchEvent(new Event('pp-stats-ready'));
+</script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -181,6 +188,44 @@
   }
   .play-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(165, 148, 249, 0.5); }
   .play-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ===== STATS CHIP (chooser screen) ===== */
+  .stats-chip {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    font-weight: 900;
+    color: #666;
+  }
+  .stats-chip .s-item {
+    background: #F5F5F5;
+    padding: 6px 14px;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stats-chip .s-item.highlight {
+    background: var(--lav-soft);
+    color: var(--lav-deep);
+  }
+  .stats-chip:empty { display: none; }
+
+  /* ===== NEW BEST CELEBRATION ===== */
+  .new-best-banner {
+    background: linear-gradient(90deg, #FFD23F, #FFB94F);
+    color: #6B4100;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 14px;
+    animation: pulseIn 0.5s ease;
+  }
 
   /* ===== ROUND INTRO ===== */
   .round-intro {
@@ -669,7 +714,7 @@
       <div class="tagline">Four memory games. Random order. Surprise!</div>
 
       <div class="howto">
-        <b>How it works:</b> You'll play 4 rounds. Each round is a random memory game - Simon Says, Memory Cards, Flash & Recall, or Sequence Memory. You won't know what's next until it appears!
+        <b>How it works:</b> You'll play 4 rounds. Each round is a random memory game — Simon Says, Memory Cards, Flash & Recall, or Sequence Memory. You won't know what's next until it appears!
       </div>
 
       <div class="section-label">Pick your difficulty</div>
@@ -678,6 +723,8 @@
         <button class="diff-chip" data-d="medium"><span class="emoji">🔥</span><span>Medium</span></button>
         <button class="diff-chip" data-d="hard"><span class="emoji">💎</span><span>Hard</span></button>
       </div>
+
+      <div class="stats-chip" id="chooserStats"></div>
 
       <button id="playBtn" class="play-btn" disabled>Pick a difficulty to start</button>
     </div>
@@ -697,10 +744,10 @@
   <section id="gameScreen" class="screen">
     <div class="card">
       <div class="game-status">
-        <div id="gameStatusLeft">-</div>
+        <div id="gameStatusLeft">—</div>
         <div class="timer" id="gameTimer">0.0s</div>
       </div>
-      <div class="instruction" id="gameInstruction">-</div>
+      <div class="instruction" id="gameInstruction">—</div>
       <div id="gameBody"></div>
       <div class="submit-row" id="gameActions"></div>
     </div>
@@ -711,7 +758,7 @@
     <div class="card round-result">
       <div class="result-emoji" id="resEmoji">🎉</div>
       <div class="result-title" id="resTitle">Nice!</div>
-      <div class="result-sub" id="resSub">-</div>
+      <div class="result-sub" id="resSub">—</div>
       <div class="points-earned" id="resPts">+0</div>
       <div class="bonus-hits" id="resBonuses"></div>
       <button id="nextBtn" class="next-btn">Next Round →</button>
@@ -724,6 +771,8 @@
       <div class="end-emoji" id="endEmoji">🎉</div>
       <div class="end-title" id="endTitle">Sharp Mind!</div>
       <div class="end-sub" id="endSub">Difficulty: Easy</div>
+
+      <div id="newBestBanner" class="new-best-banner" style="display:none;">🌟 NEW BEST SCORE!</div>
 
       <div class="stats-row">
         <div class="stat-box"><div class="num" id="statScore">0</div><div class="label">Score</div></div>
@@ -749,10 +798,10 @@ const $ = (sel) => document.querySelector(sel);
 /* ============== GLOBAL STATE ============== */
 const state = {
   difficulty: null,
-  rounds: [],
-  current: 0,
+  rounds: [],           // [{format, ...}]
+  current: 0,           // 0..3
   score: 0,
-  perRound: [],
+  perRound: [],         // [{format, passed, points, speedBonus, perfectRound, timeMs, hintsUsed}]
   muted: false,
 };
 
@@ -781,38 +830,40 @@ const CFG = {
   speedThresholdMs: { easy: 30000, medium: 45000, hard: 60000 },
 };
 
-const MEADOW_EMOJI = ["🌸","🌻","🦋","🐝","🌿","🍄","🐞","🦔","🌺","🌼","🐿️","🪻","🌹","🐛","🐌","🪷","🦉","🌷","🍃","🪲"];
+/* Meadow emoji bank */
+const MEADOW_EMOJI = ['🌸','🌻','🦋','🐝','🌿','🍄','🐞','🦔','🌺','🌼','🐿️','🪻','🌹','🐛','🐌','🪷','🦉','🌷','🍃','🪲'];
 
+/* Format metadata */
 const FORMATS = {
   simon: {
-    emoji: "🎵", name: "Simon Says",
-    desc: "Watch the sequence, then tap the tiles in the same order."
+    emoji: '🎵', name: 'Simon Says',
+    desc: 'Watch the sequence, then tap the tiles in the same order.'
   },
   cards: {
-    emoji: "🃏", name: "Memory Cards",
-    desc: "Flip cards two at a time to find matching pairs. Fewer moves = better score!"
+    emoji: '🃏', name: 'Memory Cards',
+    desc: 'Flip cards two at a time to find matching pairs. Fewer moves = better score!'
   },
   flash: {
-    emoji: "⚡", name: "Flash & Recall",
-    desc: "A grid of items will flash. Remember them, then pick them from a larger pool."
+    emoji: '⚡', name: 'Flash & Recall',
+    desc: 'A grid of items will flash. Remember them, then pick them from a larger pool.'
   },
   seq: {
-    emoji: "🔢", name: "Sequence Memory",
-    desc: "Memorize a sequence, then reproduce it in the correct order."
+    emoji: '🔢', name: 'Sequence Memory',
+    desc: 'Memorize a sequence, then reproduce it in the correct order.'
   },
 };
 
 /* ============== SCREEN CONTROL ============== */
 function showScreen(id) {
-  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
-  $(`#${id}`).classList.add("active");
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(`#${id}`).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function updateHud() {
-  $("#scorePill").textContent = state.score;
-  $("#roundPill").textContent = `Round ${state.current + 1} / 4`;
-  $("#hud").style.display = state.rounds.length > 0 ? "flex" : "none";
+  $('#scorePill').textContent = state.score;
+  $('#roundPill').textContent = `Round ${state.current + 1} / 4`;
+  $('#hud').style.display = state.rounds.length > 0 ? 'flex' : 'none';
 }
 
 /* ============== AUDIO ============== */
@@ -830,21 +881,21 @@ function playTone(freq, durMs = 200) {
   if (!ctx) return;
   const o = ctx.createOscillator();
   const g = ctx.createGain();
-  o.connect(g);
-  g.connect(ctx.destination);
+  o.connect(g); g.connect(ctx.destination);
   o.frequency.value = freq;
-  o.type = "sine";
+  o.type = 'sine';
   g.gain.setValueAtTime(0.0001, ctx.currentTime);
   g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.01);
   g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + durMs / 1000);
   o.start();
   o.stop(ctx.currentTime + durMs / 1000 + 0.05);
 }
+// tile -> frequency map (pentatonic-ish for pleasant combos)
 const TILE_FREQS = [262, 330, 392, 494, 523, 587, 659, 784, 880];
 
-$("#muteBtn").addEventListener("click", () => {
+$('#muteBtn').addEventListener('click', () => {
   state.muted = !state.muted;
-  $("#muteBtn").textContent = state.muted ? "🔇" : "🔊";
+  $('#muteBtn').textContent = state.muted ? '🔇' : '🔊';
 });
 
 /* ============== TIMER ============== */
@@ -852,34 +903,31 @@ let timerId = null;
 let timerStart = 0;
 function startTimer() {
   timerStart = performance.now();
-  $("#gameTimer").textContent = "0.0s";
+  $('#gameTimer').textContent = '0.0s';
   timerId = setInterval(() => {
     const s = ((performance.now() - timerStart) / 1000).toFixed(1);
-    $("#gameTimer").textContent = `${s}s`;
+    $('#gameTimer').textContent = `${s}s`;
   }, 100);
 }
 function stopTimer() {
-  if (timerId) {
-    clearInterval(timerId);
-    timerId = null;
-  }
+  if (timerId) { clearInterval(timerId); timerId = null; }
   return performance.now() - timerStart;
 }
 
 /* ============== CHOOSER ============== */
-document.querySelectorAll(".diff-chip").forEach((chip) => {
-  chip.addEventListener("click", () => {
-    document.querySelectorAll(".diff-chip").forEach((c) => c.classList.remove("active"));
-    chip.classList.add("active");
+document.querySelectorAll('.diff-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.diff-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
     state.difficulty = chip.dataset.d;
-    $("#playBtn").disabled = false;
-    $("#playBtn").textContent = "Let's Play! 🌸";
+    $('#playBtn').disabled = false;
+    $('#playBtn').textContent = `Let's Play! 🌸`;
   });
 });
-$("#playBtn").addEventListener("click", startSession);
+$('#playBtn').addEventListener('click', startSession);
 
 function shuffleFormats() {
-  const keys = ["simon", "cards", "flash", "seq"];
+  const keys = ['simon', 'cards', 'flash', 'seq'];
   for (let i = keys.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [keys[i], keys[j]] = [keys[j], keys[i]];
@@ -889,7 +937,7 @@ function shuffleFormats() {
 
 function startSession() {
   if (!state.difficulty) return;
-  state.rounds = shuffleFormats().map((f) => ({ format: f }));
+  state.rounds = shuffleFormats().map(f => ({ format: f }));
   state.current = 0;
   state.score = 0;
   state.perRound = [];
@@ -901,25 +949,25 @@ function startSession() {
 function showIntro() {
   const fmt = state.rounds[state.current].format;
   const meta = FORMATS[fmt];
-  $("#introEmoji").textContent = meta.emoji;
-  $("#introName").textContent = meta.name;
-  $("#introDesc").textContent = meta.desc;
+  $('#introEmoji').textContent = meta.emoji;
+  $('#introName').textContent = meta.name;
+  $('#introDesc').textContent = meta.desc;
   updateHud();
-  showScreen("introScreen");
+  showScreen('introScreen');
 }
 
-$("#startRoundBtn").addEventListener("click", () => {
+$('#startRoundBtn').addEventListener('click', () => {
   const fmt = state.rounds[state.current].format;
-  if (fmt === "simon") startSimon();
-  else if (fmt === "cards") startCards();
-  else if (fmt === "flash") startFlash();
-  else if (fmt === "seq") startSeq();
+  if (fmt === 'simon') startSimon();
+  else if (fmt === 'cards') startCards();
+  else if (fmt === 'flash') startFlash();
+  else if (fmt === 'seq') startSeq();
 });
 
 /* ============== SHARED ROUND FINISH ============== */
 function finishRound({ passed, points, perfectRound, timeMs }) {
   const threshold = CFG.speedThresholdMs[state.difficulty];
-  const speedBonus = passed && timeMs < threshold ? 20 : 0;
+  const speedBonus = (passed && timeMs < threshold) ? 20 : 0;
   const totalPts = points + speedBonus;
 
   state.score += totalPts;
@@ -933,33 +981,34 @@ function finishRound({ passed, points, perfectRound, timeMs }) {
     timeMs,
   });
 
+  // build result screen
   const fmt = FORMATS[state.rounds[state.current].format];
   if (passed && perfectRound) {
-    $("#resEmoji").textContent = "🌟";
-    $("#resTitle").textContent = "Perfect!";
-    $("#resSub").textContent = `${fmt.name} - flawless!`;
+    $('#resEmoji').textContent = '🌟';
+    $('#resTitle').textContent = 'Perfect!';
+    $('#resSub').textContent = `${fmt.name} — flawless!`;
   } else if (passed) {
-    $("#resEmoji").textContent = "✅";
-    $("#resTitle").textContent = "Nice work!";
-    $("#resSub").textContent = `${fmt.name} - you passed.`;
+    $('#resEmoji').textContent = '✅';
+    $('#resTitle').textContent = 'Nice work!';
+    $('#resSub').textContent = `${fmt.name} — you passed.`;
   } else {
-    $("#resEmoji").textContent = "💔";
-    $("#resTitle").textContent = "Tough one!";
-    $("#resSub").textContent = `${fmt.name} - you'll get it next time.`;
+    $('#resEmoji').textContent = '💔';
+    $('#resTitle').textContent = 'Tough one!';
+    $('#resSub').textContent = `${fmt.name} — you'll get it next time.`;
   }
-  $("#resPts").textContent = `+${totalPts} pts`;
+  $('#resPts').textContent = `+${totalPts} pts`;
 
   const bonusHtml = [];
   if (perfectRound) bonusHtml.push(`<span class="bonus-hit">🌟 Perfect Round</span>`);
   if (speedBonus > 0) bonusHtml.push(`<span class="bonus-hit">🏎️ Speed +${speedBonus}</span>`);
-  $("#resBonuses").innerHTML = bonusHtml.join("");
+  $('#resBonuses').innerHTML = bonusHtml.join('');
 
   updateHud();
-  $("#nextBtn").textContent = state.current + 1 < state.rounds.length ? "Next Round →" : "See Results →";
-  showScreen("resultScreen");
+  $('#nextBtn').textContent = (state.current + 1 < state.rounds.length) ? 'Next Round →' : 'See Results →';
+  showScreen('resultScreen');
 }
 
-$("#nextBtn").addEventListener("click", () => {
+$('#nextBtn').addEventListener('click', () => {
   if (state.current + 1 < state.rounds.length) {
     state.current++;
     showIntro();
@@ -983,71 +1032,75 @@ function startSimon() {
     cfg,
     sequence,
     userPos: 0,
-    phase: "watch",
+    phase: 'watch',  // 'watch' | 'play' | 'done'
     mistakes: 0,
     maxReached: 0,
   };
 
-  $("#gameBody").innerHTML = `<div class="simon-grid size-${cfg.tiles}" id="simonGrid"></div>
+  // Build UI
+  $('#gameBody').innerHTML = `<div class="simon-grid size-${cfg.tiles}" id="simonGrid"></div>
     <div class="simon-progress" id="simonProg">Sequence: 0 / ${seqLen}</div>`;
-  $("#gameActions").innerHTML = "";
-  $("#gameStatusLeft").textContent = "Simon Says";
-  $("#gameInstruction").textContent = "Watch carefully…";
+  $('#gameActions').innerHTML = '';
+  $('#gameStatusLeft').textContent = 'Simon Says';
+  $('#gameInstruction').textContent = 'Watch carefully…';
 
-  const grid = $("#simonGrid");
+  const grid = $('#simonGrid');
   for (let i = 0; i < cfg.tiles; i++) {
-    const tile = document.createElement("button");
+    const tile = document.createElement('button');
     tile.className = `simon-tile simon-t${i} disabled`;
     tile.dataset.idx = i;
-    tile.addEventListener("click", () => onSimonTap(i));
+    tile.addEventListener('click', () => onSimonTap(i));
     grid.appendChild(tile);
   }
 
-  showScreen("gameScreen");
+  showScreen('gameScreen');
   setTimeout(() => flashSequence(), 600);
 }
 
 async function flashSequence() {
   for (let i = 0; i < simonState.sequence.length; i++) {
-    await new Promise((r) => setTimeout(r, simonState.cfg.gapMs));
+    await new Promise(r => setTimeout(r, simonState.cfg.gapMs));
     const idx = simonState.sequence[i];
     const tile = document.querySelector(`.simon-tile[data-idx="${idx}"]`);
-    tile.classList.add("flash");
+    tile.classList.add('flash');
     playTone(TILE_FREQS[idx], simonState.cfg.flashMs * 0.8);
-    await new Promise((r) => setTimeout(r, simonState.cfg.flashMs));
-    tile.classList.remove("flash");
+    await new Promise(r => setTimeout(r, simonState.cfg.flashMs));
+    tile.classList.remove('flash');
   }
-  simonState.phase = "play";
-  $("#gameInstruction").textContent = "Your turn!";
-  document.querySelectorAll(".simon-tile").forEach((t) => t.classList.remove("disabled"));
+  // enable user input
+  simonState.phase = 'play';
+  $('#gameInstruction').textContent = 'Your turn!';
+  document.querySelectorAll('.simon-tile').forEach(t => t.classList.remove('disabled'));
   startTimer();
 }
 
 function onSimonTap(idx) {
-  if (simonState.phase !== "play") return;
+  if (simonState.phase !== 'play') return;
 
   const tile = document.querySelector(`.simon-tile[data-idx="${idx}"]`);
-  tile.classList.add("flash");
+  tile.classList.add('flash');
   playTone(TILE_FREQS[idx], 200);
-  setTimeout(() => tile.classList.remove("flash"), 200);
+  setTimeout(() => tile.classList.remove('flash'), 200);
 
   const expected = simonState.sequence[simonState.userPos];
   if (idx !== expected) {
-    simonState.phase = "done";
+    // wrong!
+    simonState.phase = 'done';
     simonState.maxReached = simonState.userPos;
-    document.querySelectorAll(".simon-tile").forEach((t) => t.classList.add("disabled"));
+    document.querySelectorAll('.simon-tile').forEach(t => t.classList.add('disabled'));
     const timeMs = stopTimer();
     scoreSimonRound(timeMs);
     return;
   }
 
   simonState.userPos++;
-  $("#simonProg").textContent = `Sequence: ${simonState.userPos} / ${simonState.sequence.length}`;
+  $('#simonProg').textContent = `Sequence: ${simonState.userPos} / ${simonState.sequence.length}`;
 
   if (simonState.userPos === simonState.sequence.length) {
-    simonState.phase = "done";
+    // complete!
+    simonState.phase = 'done';
     simonState.maxReached = simonState.userPos;
-    document.querySelectorAll(".simon-tile").forEach((t) => t.classList.add("disabled"));
+    document.querySelectorAll('.simon-tile').forEach(t => t.classList.add('disabled'));
     const timeMs = stopTimer();
     scoreSimonRound(timeMs);
   }
@@ -1056,9 +1109,7 @@ function onSimonTap(idx) {
 function scoreSimonRound(timeMs) {
   const len = simonState.sequence.length;
   const pct = simonState.maxReached / len;
-  let points;
-  let passed;
-  let perfect;
+  let points, passed, perfect;
 
   if (pct >= 1) { points = 100; passed = true; perfect = true; }
   else if (pct >= 0.8) { points = 70; passed = true; perfect = false; }
@@ -1078,42 +1129,40 @@ function startCards() {
   const cfg = CFG.cards[d];
   const pairs = cfg.pairs;
 
+  // pick emoji pool
   const pool = [...MEADOW_EMOJI].sort(() => Math.random() - 0.5).slice(0, pairs);
   const deck = [];
-  pool.forEach((e) => {
-    deck.push(e);
-    deck.push(e);
-  });
+  pool.forEach(e => { deck.push(e); deck.push(e); });
   deck.sort(() => Math.random() - 0.5);
 
   cardsState = {
     deck,
-    flipped: [],
-    matched: new Set(),
+    flipped: [],       // indices currently flipped and unmatched
+    matched: new Set(),// indices already matched
     moves: 0,
     totalPairs: pairs,
   };
 
-  $("#gameStatusLeft").textContent = "Memory Cards";
-  $("#gameInstruction").textContent = "Find all pairs!";
+  $('#gameStatusLeft').textContent = 'Memory Cards';
+  $('#gameInstruction').textContent = 'Find all pairs!';
   const totalCards = pairs * 2;
-  $("#gameBody").innerHTML = `
+  $('#gameBody').innerHTML = `
     <div class="cards-grid size-${totalCards}" id="cardsGrid"></div>
     <div class="moves-count" id="movesCount">Moves: 0</div>
   `;
-  $("#gameActions").innerHTML = "";
+  $('#gameActions').innerHTML = '';
 
-  const grid = $("#cardsGrid");
+  const grid = $('#cardsGrid');
   deck.forEach((emoji, i) => {
-    const c = document.createElement("div");
-    c.className = "mem-card";
+    const c = document.createElement('div');
+    c.className = 'mem-card';
     c.dataset.idx = i;
     c.innerHTML = `<span class="back-icon">❓</span>`;
-    c.addEventListener("click", () => onCardClick(i));
+    c.addEventListener('click', () => onCardClick(i));
     grid.appendChild(c);
   });
 
-  showScreen("gameScreen");
+  showScreen('gameScreen');
   startTimer();
 }
 
@@ -1123,19 +1172,20 @@ function onCardClick(idx) {
   if (cardsState.flipped.length >= 2) return;
 
   const card = document.querySelector(`.mem-card[data-idx="${idx}"]`);
-  card.classList.add("flipped");
+  card.classList.add('flipped');
   card.textContent = cardsState.deck[idx];
   cardsState.flipped.push(idx);
   playTone(TILE_FREQS[idx % TILE_FREQS.length], 100);
 
   if (cardsState.flipped.length === 2) {
     cardsState.moves++;
-    $("#movesCount").textContent = `Moves: ${cardsState.moves}`;
+    $('#movesCount').textContent = `Moves: ${cardsState.moves}`;
     const [a, b] = cardsState.flipped;
     if (cardsState.deck[a] === cardsState.deck[b]) {
+      // match
       setTimeout(() => {
-        document.querySelector(`.mem-card[data-idx="${a}"]`).classList.add("matched");
-        document.querySelector(`.mem-card[data-idx="${b}"]`).classList.add("matched");
+        document.querySelector(`.mem-card[data-idx="${a}"]`).classList.add('matched');
+        document.querySelector(`.mem-card[data-idx="${b}"]`).classList.add('matched');
         cardsState.matched.add(a);
         cardsState.matched.add(b);
         cardsState.flipped = [];
@@ -1146,11 +1196,12 @@ function onCardClick(idx) {
         }
       }, 350);
     } else {
+      // no match — flip back
       setTimeout(() => {
         const ca = document.querySelector(`.mem-card[data-idx="${a}"]`);
         const cb = document.querySelector(`.mem-card[data-idx="${b}"]`);
-        ca.classList.remove("flipped");
-        cb.classList.remove("flipped");
+        ca.classList.remove('flipped');
+        cb.classList.remove('flipped');
         ca.innerHTML = `<span class="back-icon">❓</span>`;
         cb.innerHTML = `<span class="back-icon">❓</span>`;
         cardsState.flipped = [];
@@ -1161,10 +1212,8 @@ function onCardClick(idx) {
 
 function finishCardsRound() {
   const timeMs = stopTimer();
-  const efficiency = cardsState.totalPairs / cardsState.moves;
-  let points;
-  let passed;
-  let perfect;
+  const efficiency = cardsState.totalPairs / cardsState.moves; // 1 = perfect
+  let points, passed, perfect;
   if (efficiency >= 0.9) { points = 100; passed = true; perfect = efficiency === 1; }
   else if (efficiency >= 0.7) { points = 70; passed = true; perfect = false; }
   else if (efficiency >= 0.5) { points = 50; passed = true; perfect = false; }
@@ -1182,41 +1231,43 @@ function startFlash() {
   const d = state.difficulty;
   const cfg = CFG.flash[d];
 
+  // shuffle full meadow, take `total` as available pool, from those pick `items` to show
   const pool = [...MEADOW_EMOJI].sort(() => Math.random() - 0.5).slice(0, cfg.total);
   const shown = [...pool].sort(() => Math.random() - 0.5).slice(0, cfg.items);
   const shownSet = new Set(shown);
 
   flashState = {
     cfg,
-    pool,
-    shown,
+    pool,       // all options user will pick from
+    shown,      // what was flashed
     shownSet,
     selected: new Set(),
-    phase: "view",
+    phase: 'view',
   };
 
-  $("#gameStatusLeft").textContent = "Flash & Recall";
-  $("#gameInstruction").textContent = `Memorize these ${cfg.items} items…`;
-  $("#gameBody").innerHTML = `
+  $('#gameStatusLeft').textContent = 'Flash & Recall';
+  $('#gameInstruction').textContent = `Memorize these ${cfg.items} items…`;
+  $('#gameBody').innerHTML = `
     <div class="flash-grid show-${cfg.items}" id="flashGrid"></div>
     <div class="countdown-bar"><div class="countdown-bar-fill" id="cdBar"></div></div>
   `;
-  $("#gameActions").innerHTML = "";
+  $('#gameActions').innerHTML = '';
 
-  const grid = $("#flashGrid");
-  shown.forEach((e) => {
-    const item = document.createElement("div");
-    item.className = "flash-item";
+  const grid = $('#flashGrid');
+  shown.forEach(e => {
+    const item = document.createElement('div');
+    item.className = 'flash-item';
     item.textContent = e;
     grid.appendChild(item);
   });
 
-  showScreen("gameScreen");
+  showScreen('gameScreen');
 
-  const bar = $("#cdBar");
+  // start countdown
+  const bar = $('#cdBar');
   setTimeout(() => {
     bar.style.transition = `width ${cfg.viewMs}ms linear`;
-    bar.style.width = "0%";
+    bar.style.width = '0%';
   }, 50);
 
   setTimeout(() => {
@@ -1225,65 +1276,63 @@ function startFlash() {
 }
 
 function transitionToPick() {
-  flashState.phase = "pick";
+  flashState.phase = 'pick';
   const cfg = flashState.cfg;
-  $("#gameInstruction").textContent = `Pick the ${cfg.items} you saw:`;
+  $('#gameInstruction').textContent = `Pick the ${cfg.items} you saw:`;
   startTimer();
 
-  $("#gameBody").innerHTML = `<div class="pick-grid opt-${cfg.total}" id="pickGrid"></div>`;
-  $("#gameActions").innerHTML = `<button class="submit-btn" id="pickSubmit" disabled>Submit (0 / ${cfg.items})</button>`;
+  $('#gameBody').innerHTML = `<div class="pick-grid opt-${cfg.total}" id="pickGrid"></div>`;
+  $('#gameActions').innerHTML = `<button class="submit-btn" id="pickSubmit" disabled>Submit (0 / ${cfg.items})</button>`;
 
-  const grid = $("#pickGrid");
-  flashState.pool.sort(() => Math.random() - 0.5).forEach((e) => {
-    const item = document.createElement("div");
-    item.className = "pick-item";
+  const grid = $('#pickGrid');
+  flashState.pool.sort(() => Math.random() - 0.5).forEach(e => {
+    const item = document.createElement('div');
+    item.className = 'pick-item';
     item.textContent = e;
     item.dataset.emoji = e;
-    item.addEventListener("click", () => togglePick(item, e));
+    item.addEventListener('click', () => togglePick(item, e));
     grid.appendChild(item);
   });
 
-  $("#pickSubmit").addEventListener("click", submitPick);
+  $('#pickSubmit').addEventListener('click', submitPick);
 }
 
 function togglePick(el, emoji) {
-  if (flashState.phase !== "pick") return;
+  if (flashState.phase !== 'pick') return;
   if (flashState.selected.has(emoji)) {
     flashState.selected.delete(emoji);
-    el.classList.remove("selected");
+    el.classList.remove('selected');
   } else {
     if (flashState.selected.size >= flashState.cfg.items) return;
     flashState.selected.add(emoji);
-    el.classList.add("selected");
+    el.classList.add('selected');
     playTone(500 + Math.random() * 200, 60);
   }
-  const sub = $("#pickSubmit");
+  const sub = $('#pickSubmit');
   sub.textContent = `Submit (${flashState.selected.size} / ${flashState.cfg.items})`;
   sub.disabled = flashState.selected.size !== flashState.cfg.items;
 }
 
 function submitPick() {
   const timeMs = stopTimer();
-  flashState.phase = "done";
+  flashState.phase = 'done';
 
   let correct = 0;
-  document.querySelectorAll(".pick-item").forEach((el) => {
+  document.querySelectorAll('.pick-item').forEach(el => {
     const em = el.dataset.emoji;
     const picked = flashState.selected.has(em);
     const wasShown = flashState.shownSet.has(em);
-    el.classList.remove("selected");
-    el.classList.add("revealed");
-    if (picked && wasShown) { el.classList.add("correct"); correct++; }
-    else if (picked && !wasShown) el.classList.add("incorrect");
-    else if (!picked && wasShown) el.classList.add("missed");
+    el.classList.remove('selected');
+    el.classList.add('revealed');
+    if (picked && wasShown) { el.classList.add('correct'); correct++; }
+    else if (picked && !wasShown) el.classList.add('incorrect');
+    else if (!picked && wasShown) el.classList.add('missed');
   });
-  $("#pickSubmit").disabled = true;
+  $('#pickSubmit').disabled = true;
 
   const N = flashState.cfg.items;
   const diff = N - correct;
-  let points;
-  let passed;
-  let perfect;
+  let points, passed, perfect;
   if (diff === 0) { points = 100; passed = true; perfect = true; }
   else if (diff === 1) { points = 70; passed = true; perfect = false; }
   else if (diff === 2) { points = 40; passed = true; perfect = false; }
@@ -1302,81 +1351,85 @@ function startSeq() {
   const cfg = CFG.seq[d];
   const len = cfg.length;
 
+  // sequence: `len` items (can repeat if we run out of unique? just use unique for now)
   const available = [...MEADOW_EMOJI].sort(() => Math.random() - 0.5);
   const sequence = available.slice(0, len);
+
+  // Option 2 everywhere: pool has decoys. Pool = sequence + 3-5 extras.
   const extras = available.slice(len, len + Math.max(3, Math.floor(len / 2)));
   const pool = [...sequence, ...extras].sort(() => Math.random() - 0.5);
 
   seqState = {
     cfg,
-    sequence,
-    pool,
-    slots: new Array(len).fill(null),
-    usedPool: new Set(),
-    phase: "view",
+    sequence,    // ordered
+    pool,        // shuffled
+    slots: new Array(len).fill(null), // what user placed
+    usedPool: new Set(),  // index in pool that's been placed
+    phase: 'view',
   };
 
-  $("#gameStatusLeft").textContent = "Sequence Memory";
-  $("#gameInstruction").textContent = "Memorize the order…";
-  $("#gameBody").innerHTML = `<div class="sequence-display" id="seqDisplay"></div>`;
-  $("#gameActions").innerHTML = "";
+  $('#gameStatusLeft').textContent = 'Sequence Memory';
+  $('#gameInstruction').textContent = 'Memorize the order…';
+  $('#gameBody').innerHTML = `<div class="sequence-display" id="seqDisplay"></div>`;
+  $('#gameActions').innerHTML = '';
 
-  showScreen("gameScreen");
+  showScreen('gameScreen');
   displaySequence();
 }
 
 async function displaySequence() {
-  const display = $("#seqDisplay");
+  const display = $('#seqDisplay');
   const cfg = seqState.cfg;
   for (let i = 0; i < seqState.sequence.length; i++) {
-    const item = document.createElement("div");
-    item.className = "seq-item";
+    const item = document.createElement('div');
+    item.className = 'seq-item';
     item.textContent = seqState.sequence[i];
     display.appendChild(item);
     playTone(TILE_FREQS[i % TILE_FREQS.length], 150);
-    await new Promise((r) => setTimeout(r, cfg.viewStepMs));
+    await new Promise(r => setTimeout(r, cfg.viewStepMs));
   }
-  await new Promise((r) => setTimeout(r, cfg.finalHoldMs));
+  await new Promise(r => setTimeout(r, cfg.finalHoldMs));
   transitionToRecall();
 }
 
 function transitionToRecall() {
-  seqState.phase = "recall";
-  $("#gameInstruction").textContent = "Now tap them in the same order:";
+  seqState.phase = 'recall';
+  $('#gameInstruction').textContent = 'Now tap them in the same order:';
   const len = seqState.sequence.length;
-  $("#gameBody").innerHTML = `
+  $('#gameBody').innerHTML = `
     <div class="slots-row" id="slotsRow"></div>
     <div class="pool-row" id="poolRow"></div>
   `;
-  $("#gameActions").innerHTML = `<button class="submit-btn" id="seqSubmit" disabled>Submit (0 / ${len})</button>`;
+  $('#gameActions').innerHTML = `<button class="submit-btn" id="seqSubmit" disabled>Submit (0 / ${len})</button>`;
 
-  const slotsRow = $("#slotsRow");
+  const slotsRow = $('#slotsRow');
   for (let i = 0; i < len; i++) {
-    const s = document.createElement("div");
-    s.className = "slot";
+    const s = document.createElement('div');
+    s.className = 'slot';
     s.dataset.idx = i;
-    s.addEventListener("click", () => onSlotClick(i));
+    s.addEventListener('click', () => onSlotClick(i));
     slotsRow.appendChild(s);
   }
 
-  const poolRow = $("#poolRow");
+  const poolRow = $('#poolRow');
   seqState.pool.forEach((e, i) => {
-    const p = document.createElement("button");
-    p.className = "pool-item";
+    const p = document.createElement('button');
+    p.className = 'pool-item';
     p.textContent = e;
     p.dataset.pidx = i;
-    p.addEventListener("click", () => onPoolClick(i));
+    p.addEventListener('click', () => onPoolClick(i));
     poolRow.appendChild(p);
   });
 
-  $("#seqSubmit").addEventListener("click", submitSeq);
+  $('#seqSubmit').addEventListener('click', submitSeq);
   startTimer();
 }
 
 function onPoolClick(pidx) {
-  if (seqState.phase !== "recall") return;
+  if (seqState.phase !== 'recall') return;
   if (seqState.usedPool.has(pidx)) return;
-  const firstEmpty = seqState.slots.findIndex((s) => s === null);
+  // find first empty slot
+  const firstEmpty = seqState.slots.findIndex(s => s === null);
   if (firstEmpty === -1) return;
   const emoji = seqState.pool[pidx];
   seqState.slots[firstEmpty] = { emoji, pidx };
@@ -1386,9 +1439,10 @@ function onPoolClick(pidx) {
 }
 
 function onSlotClick(sidx) {
-  if (seqState.phase !== "recall") return;
+  if (seqState.phase !== 'recall') return;
   const entry = seqState.slots[sidx];
   if (!entry) return;
+  // release it back to pool
   seqState.slots[sidx] = null;
   seqState.usedPool.delete(entry.pidx);
   refreshSeqUI();
@@ -1399,42 +1453,40 @@ function refreshSeqUI() {
     const el = document.querySelector(`.slot[data-idx="${i}"]`);
     if (entry) {
       el.textContent = entry.emoji;
-      el.classList.add("filled");
+      el.classList.add('filled');
     } else {
-      el.textContent = "";
-      el.classList.remove("filled");
+      el.textContent = '';
+      el.classList.remove('filled');
     }
   });
-  document.querySelectorAll(".pool-item").forEach((el) => {
-    if (seqState.usedPool.has(Number(el.dataset.pidx))) el.classList.add("used");
-    else el.classList.remove("used");
+  document.querySelectorAll('.pool-item').forEach((el, i) => {
+    if (seqState.usedPool.has(Number(el.dataset.pidx))) el.classList.add('used');
+    else el.classList.remove('used');
   });
-  const filledCount = seqState.slots.filter((s) => s !== null).length;
-  const sub = $("#seqSubmit");
+  const filledCount = seqState.slots.filter(s => s !== null).length;
+  const sub = $('#seqSubmit');
   sub.textContent = `Submit (${filledCount} / ${seqState.sequence.length})`;
   sub.disabled = filledCount !== seqState.sequence.length;
 }
 
 function submitSeq() {
   const timeMs = stopTimer();
-  seqState.phase = "done";
+  seqState.phase = 'done';
   let correctPos = 0;
   seqState.slots.forEach((entry, i) => {
     const el = document.querySelector(`.slot[data-idx="${i}"]`);
     if (entry && entry.emoji === seqState.sequence[i]) {
-      el.classList.add("correct");
+      el.classList.add('correct');
       correctPos++;
     } else {
-      el.classList.add("incorrect");
+      el.classList.add('incorrect');
     }
   });
-  $("#seqSubmit").disabled = true;
+  $('#seqSubmit').disabled = true;
 
   const N = seqState.sequence.length;
   const diff = N - correctPos;
-  let points;
-  let passed;
-  let perfect;
+  let points, passed, perfect;
   if (diff === 0) { points = 100; passed = true; perfect = true; }
   else if (diff === 1) { points = 70; passed = true; perfect = false; }
   else if (diff === 2) { points = 40; passed = true; perfect = false; }
@@ -1445,72 +1497,106 @@ function submitSeq() {
 
 /* ============== END SESSION ============== */
 function finishSession() {
-  const passedCount = state.perRound.filter((r) => r.passed).length;
-  const perfectCount = state.perRound.filter((r) => r.perfectRound).length;
-  const speedHits = state.perRound.filter((r) => r.speedBonus > 0).length;
+  const passedCount = state.perRound.filter(r => r.passed).length;
+  const perfectCount = state.perRound.filter(r => r.perfectRound).length;
+  const speedHits = state.perRound.filter(r => r.speedBonus > 0).length;
 
   const bonuses = [];
 
   if (passedCount === 4) {
     state.score += 50;
-    bonuses.push({ label: "🔥 All 4 Passed!", pts: 50 });
+    bonuses.push({ label: '🔥 All 4 Passed!', pts: 50 });
   }
   if (perfectCount === 4) {
     state.score += 100;
-    bonuses.push({ label: "👑 Perfect Session!", pts: 100 });
+    bonuses.push({ label: '👑 Perfect Session!', pts: 100 });
   }
   if (speedHits === 4) {
     state.score += 50;
-    bonuses.push({ label: "🏎️ Speed Demon!", pts: 50 });
+    bonuses.push({ label: '🏎️ Speed Demon!', pts: 50 });
   }
 
-  let bonusHtml = "";
-  bonuses.forEach((b) => {
+  let bonusHtml = '';
+  bonuses.forEach(b => {
     bonusHtml += `<div class="bonus-item"><span>${b.label}</span><span class="pts">+${b.pts}</span></div>`;
   });
-  $("#bonusList").innerHTML = bonusHtml;
+  $('#bonusList').innerHTML = bonusHtml;
 
+  // tier
   const s = state.score;
-  let title;
-  let emoji;
-  if (perfectCount === 4 && speedHits === 4) { title = "Pure Brain Power!"; emoji = "🧠"; }
-  else if (s >= 400) { title = "Sharp Mind!"; emoji = "🦉"; }
-  else if (s >= 200) { title = "Good Thinking!"; emoji = "💡"; }
-  else { title = "Keep Practicing!"; emoji = "💪"; }
+  let title, emoji;
+  if (perfectCount === 4 && speedHits === 4) { title = 'Pure Brain Power!'; emoji = '🧠'; }
+  else if (s >= 400) { title = 'Sharp Mind!'; emoji = '🦉'; }
+  else if (s >= 200) { title = 'Good Thinking!'; emoji = '💡'; }
+  else { title = 'Keep Practicing!'; emoji = '💪'; }
 
   const diffLabel = state.difficulty.charAt(0).toUpperCase() + state.difficulty.slice(1);
-  $("#endEmoji").textContent = emoji;
-  $("#endTitle").textContent = title;
-  $("#endSub").textContent = `Difficulty: ${diffLabel}`;
-  $("#statScore").textContent = state.score;
-  $("#statPassed").textContent = `${passedCount}/4`;
-  $("#statSpeed").textContent = `${speedHits}/4`;
-  $("#hud").style.display = "none";
-  showScreen("endScreen");
+  $('#endEmoji').textContent = emoji;
+  $('#endTitle').textContent = title;
+  $('#endSub').textContent = `Difficulty: ${diffLabel}`;
+  $('#statScore').textContent = state.score;
+  $('#statPassed').textContent = `${passedCount}/4`;
+  $('#statSpeed').textContent = `${speedHits}/4`;
+  $('#hud').style.display = 'none';
+
+  // Record session + new-best banner
+  const stats = window.ppStats && window.ppStats.recordSession('memoryMeadow', state.score);
+  if (stats && stats.newBest && state.score > 0) {
+    $('#newBestBanner').style.display = 'block';
+    $('#newBestBanner').textContent = stats.previousBest > 0
+      ? `🌟 NEW BEST! (was ${stats.previousBest})`
+      : '🌟 First score recorded!';
+  } else {
+    $('#newBestBanner').style.display = 'none';
+  }
+
+  showScreen('endScreen');
 }
 
-$("#playAgainBtn").addEventListener("click", () => {
+/* ============== CHOOSER STATS CHIP ============== */
+function renderChooserStats() {
+  if (!window.ppStats) return;
+  const stats = window.ppStats.getGameStats('memoryMeadow');
+  const streak = window.ppStats.getSharedStreak();
+  const chip = $('#chooserStats');
+  const bits = [];
+  if (stats.bestScore > 0) {
+    bits.push(`<span class="s-item">🏆 Best: ${stats.bestScore}</span>`);
+  }
+  if (streak.current > 0) {
+    bits.push(`<span class="s-item highlight">🔥 ${streak.current}-day streak</span>`);
+  }
+  if (stats.lastPlayedDate) {
+    bits.push(`<span class="s-item">Last: ${stats.humanLastPlayed}</span>`);
+  }
+  chip.innerHTML = bits.join('');
+}
+
+// Call on load, and after pp-stats becomes ready
+window.addEventListener('pp-stats-ready', renderChooserStats);
+if (window.ppStats) renderChooserStats();
+
+$('#playAgainBtn').addEventListener('click', () => {
   state.difficulty = null;
   state.rounds = [];
-  document.querySelectorAll(".diff-chip").forEach((c) => c.classList.remove("active"));
-  $("#playBtn").disabled = true;
-  $("#playBtn").textContent = "Pick a difficulty to start";
-  showScreen("chooserScreen");
+  document.querySelectorAll('.diff-chip').forEach(c => c.classList.remove('active'));
+  $('#playBtn').disabled = true;
+  $('#playBtn').textContent = 'Pick a difficulty to start';
+  showScreen('chooserScreen');
 });
 
-$("#shareBtn").addEventListener("click", async () => {
+$('#shareBtn').addEventListener('click', async () => {
   const diff = state.difficulty.charAt(0).toUpperCase() + state.difficulty.slice(1);
-  const passedCount = state.perRound.filter((r) => r.passed).length;
+  const passedCount = state.perRound.filter(r => r.passed).length;
   const text = `I scored ${state.score} on Memory Meadow!\nDifficulty: ${diff} | Passed: ${passedCount}/4\nTrain your brain at puzzleperch.com 🌸🦉`;
   try {
-    if (navigator.share) await navigator.share({ text, title: "Memory Meadow" });
+    if (navigator.share) await navigator.share({ text, title: 'Memory Meadow' });
     else {
       await navigator.clipboard.writeText(text);
-      $("#shareBtn").textContent = "Copied!";
-      setTimeout(() => $("#shareBtn").textContent = "Share 🚀", 1500);
+      $('#shareBtn').textContent = 'Copied!';
+      setTimeout(() => $('#shareBtn').textContent = 'Share 🚀', 1500);
     }
-  } catch (e) {
-  }
+  } catch (e) { /* user cancelled */ }
 });
 </script>
 </body>

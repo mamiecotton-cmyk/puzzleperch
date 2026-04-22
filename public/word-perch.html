@@ -7,6 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+<!-- Shared stats module -->
+<script type="module">
+  import * as PPStats from '/pp-stats.js';
+  window.ppStats = PPStats;
+  window.dispatchEvent(new Event('pp-stats-ready'));
+</script>
 <style>
   :root {
     --bg: #FFFFFF;
@@ -150,6 +157,48 @@
   }
   .btn-start:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(255,107,107,0.5); }
   .btn-start:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ===== STATS CHIP ===== */
+  .stats-chip {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 14px 0 0;
+    flex-wrap: wrap;
+    font-size: 13px;
+    font-weight: 800;
+    color: #666;
+  }
+  .stats-chip .s-item {
+    background: #F5F5F5;
+    padding: 6px 14px;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stats-chip .s-item.highlight {
+    background: #EDE8FF;
+    color: var(--purple);
+  }
+  .stats-chip:empty { display: none; }
+  .new-best-banner {
+    background: linear-gradient(90deg, #FFD23F, #FFB94F);
+    color: #6B4100;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 14px;
+    text-align: center;
+    margin: 0 auto 14px;
+    max-width: 320px;
+    animation: pulseBanner 0.5s ease;
+  }
+  @keyframes pulseBanner {
+    0% { opacity: 0; transform: scale(0.92); }
+    60% { opacity: 1; transform: scale(1.04); }
+    100% { opacity: 1; transform: scale(1); }
+  }
 
   /* LOADING */
   .loading-wrap {
@@ -524,6 +573,7 @@
 
     <div class="start-btn-wrap">
       <button class="btn-start" id="startBtn" disabled>Let's Play! 🚀</button>
+      <div class="stats-chip" id="chooserStats"></div>
     </div>
   </section>
 
@@ -563,6 +613,7 @@
       <div class="end-emoji" id="endEmoji">🎉</div>
       <div class="end-title" id="endTitle">All perched!</div>
       <div class="end-sub" id="endSub">You finished Word Perch.</div>
+      <div id="newBestBanner" class="new-best-banner" style="display:none;">🌟 NEW BEST SCORE!</div>
       <div class="end-stats">
         <div class="end-stat"><div class="end-stat-num" id="endScore">0</div><div class="end-stat-label">Score</div></div>
         <div class="end-stat"><div class="end-stat-num" id="endTime">0:00</div><div class="end-stat-label">Time</div></div>
@@ -1246,6 +1297,17 @@ function endGame() {
   $('#endEmoji').textContent = emoji;
   $('#endSub').textContent = `${state.category} · ${state.difficulty[0].toUpperCase()+state.difficulty.slice(1)}`;
 
+  // Record session to shared stats
+  const statsResult = window.ppStats && window.ppStats.recordSession('wordPerch', score);
+  if (statsResult && statsResult.newBest && score > 0) {
+    $('#newBestBanner').style.display = 'block';
+    $('#newBestBanner').textContent = statsResult.previousBest > 0
+      ? `🌟 NEW BEST! (was ${statsResult.previousBest})`
+      : '🌟 First score recorded!';
+  } else {
+    $('#newBestBanner').style.display = 'none';
+  }
+
   switchScreen('endScreen');
   fireConfetti();
 
@@ -1289,6 +1351,22 @@ function fireConfetti() {
   document.body.appendChild(wrap);
   setTimeout(() => wrap.remove(), 5500);
 }
+
+/* ======= CHOOSER STATS CHIP ======= */
+function renderChooserStats() {
+  if (!window.ppStats) return;
+  const gs = window.ppStats.getGameStats('wordPerch');
+  const streak = window.ppStats.getSharedStreak();
+  const chip = document.getElementById('chooserStats');
+  if (!chip) return;
+  const bits = [];
+  if (gs.bestScore > 0) bits.push(`<span class="s-item">🏆 Best: ${gs.bestScore}</span>`);
+  if (streak.current > 0) bits.push(`<span class="s-item highlight">🔥 ${streak.current}-day streak</span>`);
+  if (gs.lastPlayedDate) bits.push(`<span class="s-item">Last: ${gs.humanLastPlayed}</span>`);
+  chip.innerHTML = bits.join('');
+}
+window.addEventListener('pp-stats-ready', renderChooserStats);
+if (window.ppStats) renderChooserStats();
 
 /* ======= INIT ======= */
 renderTabs();

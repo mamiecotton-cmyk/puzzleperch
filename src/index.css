@@ -389,6 +389,10 @@ a {
   border-color: #7acb78;
 }
 
+.card.vault {
+  border-color: #d8af58;
+}
+
 .preview-meadow {
   background: linear-gradient(135deg, #D6CCFF, #A594F9 60%, #6B52D4);
   font-size: 80px;
@@ -441,6 +445,29 @@ a {
 
 .badge-trail {
   background: linear-gradient(90deg, #7acb78, #387a3b);
+}
+
+.preview-vault {
+  background: linear-gradient(135deg, #fff2cf, #e5b862 60%, #9b6a10);
+  font-size: 80px;
+  position: relative;
+}
+
+.vault-bubble {
+  position: absolute;
+  top: 14px;
+  right: 10px;
+  background: #fff;
+  border: 2px solid var(--dark);
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--dark);
+}
+
+.badge-vault {
+  background: linear-gradient(90deg, #e5b862, #9b6a10);
 }
 
 .preview-lounge {

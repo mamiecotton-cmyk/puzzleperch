@@ -246,6 +246,22 @@ function App() {
             <div className="badge-bottom badge-trail">Follow the Letters!</div>
           </a>
 
+          {/* Theme Vault */}
+          <a className="card vault" href="/theme-vault.html" style={{ cursor: 'pointer' }}>
+            <div className="card-title">Theme Vault</div>
+            <div className="card-preview preview-vault">
+              <span>🏦</span>
+              <span className="vault-bubble">🔓</span>
+            </div>
+            <div className="card-meta">
+              Daily · 6 min <span className="star">⭐</span> 4.9
+            </div>
+            <div className="card-tags">
+              <span className="tag">Themes</span>
+            </div>
+            <div className="badge-bottom badge-vault">Open the Vault!</div>
+          </a>
+
           {/* Free Plan */}
           <div className="price-card">
             <div className="card-title">Free Plan</div>
