@@ -230,20 +230,23 @@ function App() {
             <div className="badge-bottom badge-blue">Math with a Smile</div>
           </div>
 
-          {/* Memory Meadow */}
-          <div className="card">
-            <div className="card-title">Memory Meadow</div>
-            <div className="card-preview preview-memory">
-              <span>🌸</span>
+          {/* Word Trail */}
+          <a className="card trail" href="/word-trail.html" style={{ cursor: 'pointer' }}>
+            <div className="card-title">Word Trail</div>
+            <div className="card-preview preview-trail">
+              <span>🛤️</span>
+              <span className="trail-bubble">🔤</span>
             </div>
-            <div className="card-meta">
-              Daily · 5 min <span className="star">⭐</span> 4.8
+            <div className="card-meta trail-desc">
+              Four seeded rounds of swipeable word paths
             </div>
             <div className="card-tags">
-              <span className="tag">Pattern Recognition</span>
+              <span className="tag new">New</span>
+              <span className="tag">Word Paths</span>
+              <span className="tag">Daily Seed</span>
             </div>
-            <div className="badge-bottom badge-purple">Magical &amp; Fun</div>
-          </div>
+            <div className="badge-bottom badge-trail">Follow the Letters!</div>
+          </a>
 
           {/* Free Plan */}
           <div className="price-card">

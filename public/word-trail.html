@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>Word Trail · PuzzlePerch</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --mint: #7acb78;
+    --mint-deep: #387a3b;
+    --mint-soft: #e9f8e8;
+    --forest: #2f5f38;
+    --trail: #f4b64e;
+    --trail-deep: #a86316;
+    --lav: #7463f1;
+    --lav-soft: #ece9ff;
+    --coral: #ff6b6b;
+    --dark: #1a1a2e;
+    --gray: #f5f5f5;
+    --card: #ffffff;
+    --shadow: 0 12px 34px rgba(26, 26, 46, 0.08);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    color: var(--dark);
+    background:
+      radial-gradient(circle at top right, rgba(122, 203, 120, 0.18), transparent 32%),
+      linear-gradient(180deg, #fbfff9 0%, #ffffff 38%);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button, input {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+    border: none;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .topbar-inner {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--lav);
+  }
+
+  .brand b {
+    color: var(--dark);
+  }
+
+  .hud {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    background: var(--gray);
+    color: var(--dark);
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 13px;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pill.score {
+    background: rgba(122, 203, 120, 0.18);
+    color: var(--mint-deep);
+  }
+
+  .pill.timer {
+    background: var(--lav-soft);
+    color: var(--lav);
+  }
+
+  .page {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 20px 16px 56px;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.25s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .hero-card,
+  .card {
+    background: var(--card);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .hero-card {
+    padding: 28px 22px;
+    margin-bottom: 18px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .hero-card::before {
+    content: "";
+    position: absolute;
+    inset: auto -100px -90px auto;
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(244, 182, 78, 0.22), transparent 65%);
+    pointer-events: none;
+  }
+
+  .title {
+    font-size: clamp(34px, 6vw, 54px);
+    line-height: 0.98;
+    letter-spacing: -1px;
+    color: var(--forest);
+    font-weight: 900;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    color: #56715d;
+    font-size: 16px;
+    font-weight: 700;
+    max-width: 620px;
+    line-height: 1.45;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 18px 0 20px;
+  }
+
+  .summary-box {
+    background: linear-gradient(180deg, #f8fbf7, #eef7ee);
+    border-radius: 18px;
+    padding: 14px 12px;
+  }
+
+  .summary-box .big {
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--forest);
+  }
+
+  .summary-box .label {
+    font-size: 11px;
+    font-weight: 900;
+    color: #739079;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  .chooser-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 16px;
+  }
+
+  .panel {
+    background: #fff;
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+    padding: 18px;
+  }
+
+  .panel h2 {
+    font-size: 17px;
+    font-weight: 900;
+    color: var(--dark);
+    margin-bottom: 10px;
+  }
+
+  .howto {
+    background: linear-gradient(180deg, #f5fff5, #edf7ed);
+    border-left: 4px solid var(--mint);
+    padding: 14px 15px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 700;
+    color: #45624d;
+    margin-bottom: 16px;
+  }
+
+  .howto b {
+    color: var(--forest);
+  }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 900;
+    color: #83908f;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 16px 0 10px;
+  }
+
+  .choice-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .choice-row.two {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .choice {
+    border-radius: 18px;
+    border: 2px solid #ececec;
+    background: #fff;
+    padding: 14px 10px;
+    min-height: 86px;
+    text-align: center;
+    font-weight: 900;
+    color: var(--dark);
+    transition: transform 0.15s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .choice:hover {
+    transform: translateY(-2px);
+    border-color: var(--mint);
+    box-shadow: 0 10px 24px rgba(122, 203, 120, 0.14);
+  }
+
+  .choice.selected {
+    border-color: var(--lav);
+    background: linear-gradient(180deg, #faf9ff, #f0eeff);
+    color: var(--lav);
+  }
+
+  .choice.locked {
+    opacity: 0.72;
+  }
+
+  .choice .emoji {
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  .choice small {
+    font-size: 11px;
+    color: #7f868d;
+    font-weight: 800;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .date-input {
+    flex: 1;
+    min-width: 180px;
+    border-radius: 14px;
+    border: 2px solid #e6e6e6;
+    padding: 12px 14px;
+    background: #fff;
+    font-weight: 800;
+    color: var(--dark);
+  }
+
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #6f6f80;
+  }
+
+  .premium-note,
+  .restore-note {
+    background: #fff8e7;
+    color: var(--trail-deep);
+    border: 1px solid rgba(244, 182, 78, 0.4);
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.45;
+    margin-top: 12px;
+  }
+
+  .premium-note b {
+    color: var(--dark);
+  }
+
+  .action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+
+  .btn {
+    border-radius: 999px;
+    padding: 14px 22px;
+    font-size: 15px;
+    font-weight: 900;
+    transition: transform 0.15s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--trail), #ffd07f);
+    color: #fff;
+    box-shadow: 0 10px 26px rgba(244, 182, 78, 0.34);
+  }
+
+  .btn-secondary {
+    background: var(--lav);
+    color: #fff;
+    box-shadow: 0 10px 26px rgba(116, 99, 241, 0.22);
+  }
+
+  .btn-light {
+    background: #eff3ef;
+    color: var(--dark);
+  }
+
+  .intro-card,
+  .result-card,
+  .game-card,
+  .end-card {
+    padding: 22px 18px;
+  }
+
+  .intro-card,
+  .result-card {
+    text-align: center;
+  }
+
+  .round-emoji {
+    font-size: 58px;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .round-title {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--forest);
+    margin-bottom: 4px;
+  }
+
+  .round-theme {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--trail-deep);
+    margin-bottom: 10px;
+  }
+
+  .round-copy {
+    max-width: 520px;
+    margin: 0 auto 18px;
+    color: #64706e;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+
+  .rule-strip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: #f7f8fb;
+    color: #6c7482;
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .game-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .game-head h2 {
+    font-size: 24px;
+    line-height: 1.05;
+    color: var(--forest);
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+
+  .game-head p {
+    font-size: 14px;
+    color: #657170;
+    font-weight: 700;
+    max-width: 420px;
+  }
+
+  .meta-pile {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .target-list {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .target-item {
+    border-radius: 16px;
+    padding: 12px 14px;
+    background: #f8fbf8;
+    border: 2px solid transparent;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .target-item.done {
+    background: linear-gradient(180deg, #edf8ec, #f9fff9);
+    border-color: rgba(122, 203, 120, 0.45);
+  }
+
+  .target-main {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .target-name {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--dark);
+    letter-spacing: 0.4px;
+  }
+
+  .target-note {
+    font-size: 12px;
+    font-weight: 800;
+    color: #76807f;
+  }
+
+  .target-points {
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--mint-deep);
+  }
+
+  .bonus-band {
+    background: linear-gradient(180deg, #fff9ed, #fffef6);
+    border: 1px dashed rgba(244, 182, 78, 0.6);
+    border-radius: 16px;
+    padding: 11px 12px;
+    margin-bottom: 14px;
+    color: var(--trail-deep);
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .board-shell {
+    background: linear-gradient(180deg, #f8fbf8, #f2f7f3);
+    border-radius: 22px;
+    padding: 10px;
+    margin-bottom: 12px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+  }
+
+  .board {
+    display: grid;
+    gap: 6px;
+    touch-action: none;
+    user-select: none;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .cell {
+    aspect-ratio: 1;
+    border-radius: 14px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(16px, 4.2vw, 24px);
+    font-weight: 900;
+    color: var(--dark);
+    box-shadow: 0 6px 18px rgba(47, 95, 56, 0.08);
+    transition: transform 0.12s ease, background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .cell.active {
+    background: linear-gradient(180deg, #ffe7bb, #ffd17f);
+    color: var(--trail-deep);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 10px 20px rgba(244, 182, 78, 0.24);
+  }
+
+  .cell.trace {
+    background: linear-gradient(180deg, #efeaff, #dcd3ff);
+    color: var(--lav);
+  }
+
+  .trail-live {
+    min-height: 56px;
+    border-radius: 18px;
+    background: #fff;
+    border: 2px dashed #dfdfdf;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .trail-live strong {
+    letter-spacing: 3px;
+    font-size: 24px;
+    color: var(--forest);
+  }
+
+  .trail-live span {
+    color: #8b9391;
+    font-weight: 800;
+    font-size: 14px;
+  }
+
+  .tool-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .tool {
+    flex: 1;
+    min-width: 120px;
+    border-radius: 14px;
+    padding: 12px 14px;
+    background: #fff;
+    border: 2px solid #ececec;
+    color: var(--dark);
+    font-weight: 900;
+  }
+
+  .tool.premium {
+    background: #fff9ef;
+    border-color: rgba(244, 182, 78, 0.45);
+    color: var(--trail-deep);
+  }
+
+  .feedback {
+    min-height: 22px;
+    margin-top: 12px;
+    font-size: 13px;
+    font-weight: 900;
+    color: #68716f;
+  }
+
+  .feedback.good {
+    color: var(--mint-deep);
+  }
+
+  .feedback.bad {
+    color: var(--coral);
+  }
+
+  .result-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: 12px 0 18px;
+  }
+
+  .badge {
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 900;
+    background: #f3f4f8;
+    color: #61697a;
+  }
+
+  .badge.green {
+    background: var(--mint-soft);
+    color: var(--mint-deep);
+  }
+
+  .badge.gold {
+    background: #fff2d8;
+    color: var(--trail-deep);
+  }
+
+  .result-score {
+    font-size: 40px;
+    line-height: 1;
+    color: var(--forest);
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 18px 0 20px;
+  }
+
+  .results-grid .summary-box {
+    background: linear-gradient(180deg, #ffffff, #f7faf7);
+  }
+
+  .result-card-sheet {
+    border-radius: 22px;
+    background: linear-gradient(180deg, #f8fff8, #fff9ef);
+    border: 1px solid rgba(122, 203, 120, 0.26);
+    padding: 16px;
+    margin: 14px 0 18px;
+  }
+
+  .result-card-sheet h3 {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--forest);
+    margin-bottom: 10px;
+  }
+
+  .round-summary-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .round-summary {
+    border-radius: 16px;
+    background: #fff;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .round-summary strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--dark);
+  }
+
+  .round-summary span {
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+    color: #747d88;
+    margin-top: 2px;
+  }
+
+  .round-summary b {
+    font-size: 18px;
+    color: var(--mint-deep);
+  }
+
+  .lock-note {
+    color: #7c6d3a;
+    font-size: 12px;
+    font-weight: 900;
+    margin-top: 6px;
+  }
+
+  .modal-back {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 26, 46, 0.48);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 60;
+  }
+
+  .modal-back.show {
+    display: flex;
+  }
+
+  .modal {
+    width: min(420px, 100%);
+    background: #fff;
+    border-radius: 22px;
+    padding: 24px 20px;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+    text-align: center;
+  }
+
+  .modal .emoji {
+    font-size: 54px;
+    margin-bottom: 8px;
+  }
+
+  .modal h3 {
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--forest);
+    margin-bottom: 8px;
+  }
+
+  .modal p {
+    font-size: 14px;
+    color: #676f7b;
+    font-weight: 700;
+    line-height: 1.45;
+    margin-bottom: 18px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 860px) {
+    .chooser-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 640px) {
+    .summary-grid,
+    .results-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .choice-row,
+    .choice-row.two {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .game-head {
+      flex-direction: column;
+    }
+
+    .meta-pile {
+      justify-content: flex-start;
+    }
+
+    .board {
+      max-width: 340px;
+      gap: 5px;
+    }
+
+    .cell {
+      border-radius: 12px;
+      font-size: clamp(15px, 4vw, 20px);
+    }
+  }
+</style>
+</head>
+<body>
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/"><span>🦉</span><span>Puzzle<b>Perch</b></span></a>
+    <div class="hud" id="hud" style="display:none;">
+      <div class="pill">🛤️ <span id="hudRound">Round 1 / 4</span></div>
+      <div class="pill score">⭐ <span id="hudScore">0</span></div>
+      <div class="pill timer">⏱ <span id="hudTimer">0:00</span></div>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+  <section class="screen active" id="chooseScreen">
+    <div class="hero-card">
+      <h1 class="title">Word Trail</h1>
+      <p class="subtitle">Four connected-letter rounds, one shared daily seed, and a hidden-twist workout that changes the rules just enough to stay fresh.</p>
+      <div class="summary-grid">
+        <div class="summary-box"><div class="big" id="streakCurrent">0</div><div class="label">Current Streak</div></div>
+        <div class="summary-box"><div class="big" id="streakBest">0</div><div class="label">Best Streak</div></div>
+        <div class="summary-box"><div class="big" id="summaryBestScore">0</div><div class="label">Best Score</div></div>
+      </div>
+    </div>
+
+    <div class="chooser-grid">
+      <div class="panel">
+        <h2>Daily Setup</h2>
+        <div class="howto">
+          <b>How it works:</b> Each session has 4 rounds. Connect adjacent letters to solve the targets, chase the hidden twist, and earn <b>+20 speed points</b> whenever you finish a round inside the target time.
+        </div>
+
+        <div class="section-label">Difficulty</div>
+        <div class="choice-row" id="difficultyRow"></div>
+
+        <div class="section-label">Puzzle Date</div>
+        <div class="input-row">
+          <input class="date-input" id="dateInput" type="date" />
+          <label class="toggle"><input id="proToggle" type="checkbox" /> Pro test unlock</label>
+        </div>
+        <div class="premium-note" id="dateNote"></div>
+
+        <div class="action-row">
+          <button class="btn btn-primary" id="startBtn" disabled>Start Today's Trail</button>
+          <button class="btn btn-light" id="continueBtn" style="display:none;">Continue Session</button>
+        </div>
+        <div class="restore-note" id="restoreNote" style="display:none;"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Plan Snapshot</h2>
+        <div class="section-label">Free Tier</div>
+        <div class="howto">
+          One daily session, basic hints, streak tracking, and shareable results.
+        </div>
+        <div class="section-label">PuzzlePerch Pro</div>
+        <div class="howto" style="background:#fff8ef;border-left-color:var(--trail);color:#7c673b;">
+          Archive access by date, hard mode, trace tools, deeper stats, and extra hint stock.
+        </div>
+        <div class="section-label">Advanced Stats</div>
+        <div class="summary-grid">
+          <div class="summary-box"><div class="big" id="statsSessions">0</div><div class="label">Sessions</div></div>
+          <div class="summary-box"><div class="big" id="statsSpeed">0</div><div class="label">Speed Rounds</div></div>
+          <div class="summary-box"><div class="big" id="statsAverage">0</div><div class="label">Avg Score</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="introScreen">
+    <div class="card intro-card">
+      <div class="round-emoji" id="introEmoji">🌿</div>
+      <div class="round-title" id="introTitle">Theme Trail</div>
+      <div class="round-theme" id="introTheme">Meadow Morning</div>
+      <p class="round-copy" id="introCopy"></p>
+      <div class="rule-strip" id="introRule"></div>
+      <div class="action-row" style="justify-content:center;">
+        <button class="btn btn-primary" id="startRoundBtn">Begin Round</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="gameScreen">
+    <div class="card game-card">
+      <div class="game-head">
+        <div>
+          <h2 id="gameModeTitle">Theme Trail</h2>
+          <p id="gameModeCopy"></p>
+        </div>
+        <div class="meta-pile">
+          <div class="pill">🎯 <span id="gameTargets">0 / 0</span></div>
+          <div class="pill">⚡ <span id="gameTargetTime">0s target</span></div>
+          <div class="pill score">⭐ <span id="gameRoundScore">0</span></div>
+        </div>
+      </div>
+
+      <div class="target-list" id="targetList"></div>
+      <div class="bonus-band" id="bonusBand"></div>
+
+      <div class="board-shell">
+        <div class="board" id="board"></div>
+      </div>
+
+      <div class="trail-live" id="trailLive"><span>Drag across adjacent letters to build a trail.</span></div>
+
+      <div class="tool-row">
+        <button class="tool" id="hintBtn">💡 Hint</button>
+        <button class="tool premium" id="traceBtn">✨ Trace</button>
+        <button class="tool" id="clearBtn">Clear Trail</button>
+      </div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="roundResultScreen">
+    <div class="card result-card">
+      <div class="round-emoji" id="resultEmoji">🎉</div>
+      <div class="round-title" id="resultTitle">Round Cleared</div>
+      <div class="round-copy" id="resultCopy"></div>
+      <div class="result-score" id="resultScore">0</div>
+      <div class="result-badge-row" id="resultBadges"></div>
+      <div class="action-row" style="justify-content:center;">
+        <button class="btn btn-primary" id="nextRoundBtn">Next Round</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="endScreen">
+    <div class="card end-card">
+      <div class="round-emoji" id="endEmoji">🏁</div>
+      <div class="round-title" id="endTitle">Trail Complete</div>
+      <p class="round-copy" id="endCopy"></p>
+
+      <div class="results-grid">
+        <div class="summary-box"><div class="big" id="endScore">0</div><div class="label">Final Score</div></div>
+        <div class="summary-box"><div class="big" id="endPerfect">0</div><div class="label">Cleared Rounds</div></div>
+        <div class="summary-box"><div class="big" id="endSpeed">0</div><div class="label">Speed Hits</div></div>
+        <div class="summary-box"><div class="big" id="endBonus">0</div><div class="label">Bonus Finds</div></div>
+      </div>
+
+      <div class="result-card-sheet">
+        <h3>Shareable Result Card</h3>
+        <div class="round-summary-list" id="roundSummaryList"></div>
+      </div>
+
+      <div class="action-row" style="justify-content:center;">
+        <button class="btn btn-primary" id="playAgainBtn">Play Again</button>
+        <button class="btn btn-secondary" id="shareBtn">Share Result</button>
+        <a class="btn btn-light" href="/">Home</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="modal-back" id="modalBack">
+  <div class="modal">
+    <div class="emoji" id="modalEmoji">🔒</div>
+    <h3 id="modalTitle">Locked</h3>
+    <p id="modalText">This option needs PuzzlePerch Pro.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="modalConfirm">Okay</button>
+      <button class="btn btn-light" id="modalClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import {
+  DIFFICULTY_RULES,
+  applyHint,
+  applyWordFound,
+  buildRoundState,
+  canAccessDifficulty,
+  canPlayDate,
+  dateKeyFromDate,
+  evaluatePath,
+  generateDailySession,
+  getModeMeta,
+  revealHint,
+  summarizeSession,
+  updateStreak,
+} from "/word-trail-core.js";
+
+const $ = (selector) => document.querySelector(selector);
+
+const STORAGE_KEY = "wt_progress_v1";
+const TODAY = dateKeyFromDate(new Date());
+
+const state = {
+  difficulty: "easy",
+  premium: false,
+  selectedDate: TODAY,
+  session: null,
+  roundStates: {},
+  currentRoundIndex: 0,
+  roundStartedAt: 0,
+  sessionStartedAt: 0,
+  timerId: null,
+  dragging: false,
+  path: [],
+  tracePath: [],
+  store: loadStore(),
+};
+
+function loadStore() {
+  const fallback = {
+    premium: false,
+    streakCurrent: 0,
+    streakBest: 0,
+    sessionsCompleted: 0,
+    totalScore: 0,
+    bestScore: 0,
+    speedRounds: 0,
+    completedDates: {},
+    history: {},
+    activeSession: null,
+    lastCompletedDate: null,
+  };
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return fallback;
+    return { ...fallback, ...JSON.parse(raw) };
+  } catch {
+    return fallback;
+  }
+}
+
+function saveStore() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.store));
+}
+
+function showModal({ emoji, title, text }) {
+  $("#modalEmoji").textContent = emoji;
+  $("#modalTitle").textContent = title;
+  $("#modalText").textContent = text;
+  $("#modalBack").classList.add("show");
+}
+
+function hideModal() {
+  $("#modalBack").classList.remove("show");
+}
+
+function switchScreen(id) {
+  document.querySelectorAll(".screen").forEach((screen) => screen.classList.remove("active"));
+  $(`#${id}`).classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function formatTime(totalSec) {
+  const safe = Math.max(0, Math.floor(totalSec));
+  return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, "0")}`;
+}
+
+function renderChooser() {
+  $("#streakCurrent").textContent = state.store.streakCurrent;
+  $("#streakBest").textContent = state.store.streakBest;
+  $("#summaryBestScore").textContent = state.store.bestScore;
+  $("#statsSessions").textContent = state.store.sessionsCompleted;
+  $("#statsSpeed").textContent = state.store.speedRounds;
+  $("#statsAverage").textContent = state.store.sessionsCompleted
+    ? Math.round(state.store.totalScore / state.store.sessionsCompleted)
+    : 0;
+
+  renderDifficultyChoices();
+
+  $("#dateInput").value = state.selectedDate;
+  $("#proToggle").checked = state.premium;
+
+  const canArchive = state.premium;
+  $("#dateInput").disabled = !canArchive;
+  $("#dateNote").innerHTML = canArchive
+    ? "Pro is enabled. Pick any date to replay the archive with the same daily seed for everyone."
+    : `Free play includes <b>one session for today</b>. Archive dates and Hard mode unlock with PuzzlePerch Pro.`;
+
+  const playable = canPlayDate(state.selectedDate, state.premium, state.store.completedDates);
+  const hasDifficulty = canAccessDifficulty(state.difficulty, state.premium);
+  $("#startBtn").disabled = !(playable && hasDifficulty);
+  $("#startBtn").textContent = state.selectedDate === TODAY ? "Start Today's Trail" : "Open Archive Trail";
+
+  const active = state.store.activeSession;
+  if (active && active.dateKey === state.selectedDate) {
+    $("#continueBtn").style.display = "inline-flex";
+    $("#restoreNote").style.display = "block";
+    $("#restoreNote").textContent = `Saved progress found: Round ${active.currentRoundIndex + 1} of 4 on ${active.difficulty}.`;
+  } else {
+    $("#continueBtn").style.display = "none";
+    $("#restoreNote").style.display = "none";
+  }
+}
+
+function renderDifficultyChoices() {
+  const row = $("#difficultyRow");
+  row.innerHTML = "";
+  const configs = [
+    { id: "easy", emoji: "🌱", label: "Easy", copy: "Short words" },
+    { id: "medium", emoji: "🔥", label: "Medium", copy: "Longer trails" },
+    { id: "hard", emoji: "💎", label: "Hard", copy: "Pro only" },
+  ];
+  configs.forEach((config) => {
+    const button = document.createElement("button");
+    const locked = !canAccessDifficulty(config.id, state.premium);
+    button.className = `choice${state.difficulty === config.id ? " selected" : ""}${locked ? " locked" : ""}`;
+    button.innerHTML = `<span class="emoji">${config.emoji}</span><span>${config.label}</span><small>${config.copy}</small>`;
+    button.addEventListener("click", () => {
+      if (locked) {
+        showModal({
+          emoji: "🔒",
+          title: "Hard mode is Pro",
+          text: "Free players get today's Easy and Medium workout. PuzzlePerch Pro adds Hard mode, archive access, and stronger reveal tools.",
+        });
+        return;
+      }
+      state.difficulty = config.id;
+      renderChooser();
+    });
+    row.appendChild(button);
+  });
+}
+
+function syncHud() {
+  if (!state.session) {
+    $("#hud").style.display = "none";
+    return;
+  }
+  $("#hud").style.display = "flex";
+  $("#hudRound").textContent = `Round ${state.currentRoundIndex + 1} / 4`;
+  const summary = summarizeSession(state.session, state.roundStates);
+  $("#hudScore").textContent = summary.totalScore;
+}
+
+function startSession() {
+  if (!canAccessDifficulty(state.difficulty, state.premium)) {
+    renderChooser();
+    return;
+  }
+  if (!canPlayDate(state.selectedDate, state.premium, state.store.completedDates)) {
+    showModal({
+      emoji: "🌞",
+      title: "Today's trail is done",
+      text: "Free play includes one daily session. Come back tomorrow, or turn on Pro test unlock to browse the archive.",
+    });
+    return;
+  }
+  state.session = generateDailySession({
+    dateKey: state.selectedDate,
+    difficulty: state.difficulty,
+    premium: state.premium,
+  });
+  state.roundStates = {};
+  state.session.rounds.forEach((round) => {
+    state.roundStates[round.id] = buildRoundState(round, state.premium, state.difficulty);
+  });
+  state.currentRoundIndex = 0;
+  state.sessionStartedAt = Date.now();
+  state.roundStartedAt = 0;
+  persistActiveSession();
+  syncHud();
+  showRoundIntro();
+}
+
+function restoreSession() {
+  const active = state.store.activeSession;
+  if (!active) return;
+  state.premium = state.store.premium;
+  state.selectedDate = active.dateKey;
+  state.difficulty = active.difficulty;
+  state.session = generateDailySession({
+    dateKey: active.dateKey,
+    difficulty: active.difficulty,
+    premium: true,
+  });
+  state.roundStates = active.roundStates;
+  state.currentRoundIndex = active.currentRoundIndex;
+  state.sessionStartedAt = active.sessionStartedAt;
+  state.roundStartedAt = active.roundStartedAt || Date.now();
+  syncHud();
+  renderGame();
+  switchScreen("gameScreen");
+  startRoundTimer();
+}
+
+function persistActiveSession() {
+  if (!state.session) {
+    state.store.activeSession = null;
+  } else {
+    state.store.activeSession = {
+      id: state.session.id,
+      dateKey: state.selectedDate,
+      difficulty: state.difficulty,
+      currentRoundIndex: state.currentRoundIndex,
+      roundStates: state.roundStates,
+      sessionStartedAt: state.sessionStartedAt,
+      roundStartedAt: state.roundStartedAt,
+    };
+  }
+  saveStore();
+}
+
+function currentRound() {
+  return state.session.rounds[state.currentRoundIndex];
+}
+
+function currentRoundState() {
+  return state.roundStates[currentRound().id];
+}
+
+function showRoundIntro() {
+  const round = currentRound();
+  const meta = getModeMeta(round.mode);
+  $("#introEmoji").textContent = round.emoji;
+  $("#introTitle").textContent = round.title;
+  $("#introTheme").textContent = round.theme;
+  $("#introCopy").textContent = round.subtitle;
+  $("#introRule").textContent =
+    round.mode === "master"
+      ? `Find ${round.targets.length} listed words, but keep an eye out for the hidden master word.`
+      : round.mode === "chain"
+        ? "Build the chain in order. Each solved word unlocks the next."
+        : round.mode === "ladder"
+          ? "Climb from the shortest target to the longest target."
+          : `Find ${round.targets.length} themed words on the board.`;
+  switchScreen("introScreen");
+}
+
+function startRound() {
+  state.roundStartedAt = Date.now();
+  persistActiveSession();
+  renderGame();
+  switchScreen("gameScreen");
+  startRoundTimer();
+}
+
+function startRoundTimer() {
+  clearInterval(state.timerId);
+  const tick = () => {
+    const elapsed = Math.floor((Date.now() - state.roundStartedAt) / 1000);
+    $("#hudTimer").textContent = formatTime(elapsed);
+  };
+  tick();
+  state.timerId = setInterval(tick, 1000);
+}
+
+function stopTimer() {
+  clearInterval(state.timerId);
+  state.timerId = null;
+}
+
+function renderGame() {
+  const round = currentRound();
+  const roundState = currentRoundState();
+  $("#gameModeTitle").textContent = `${round.emoji} ${round.title}`;
+  $("#gameModeCopy").textContent = `${round.theme} · ${round.subtitle}`;
+  $("#gameTargets").textContent = `${roundState.foundWordIds.length}/${round.targets.length}`;
+  $("#gameTargetTime").textContent = `${round.targetTimeSec}s target`;
+  $("#gameRoundScore").textContent = roundState.score;
+  $("#bonusBand").textContent = round.hiddenBonuses.length
+    ? `Hidden bonus: there is ${round.hiddenBonuses.length} extra word on this board worth bonus points if you spot it before the round ends.`
+    : round.mode === "chain"
+      ? "Chain bonus: each word must be solved in the listed order."
+      : "Daily twist: stick to the round rule to keep the trail flowing.";
+  renderTargets();
+  renderBoard();
+  renderTools();
+  syncHud();
+}
+
+function renderTargets() {
+  const round = currentRound();
+  const roundState = currentRoundState();
+  const list = $("#targetList");
+  list.innerHTML = "";
+  round.targets.forEach((target, index) => {
+    const found = roundState.foundWordIds.includes(target.id);
+    const item = document.createElement("div");
+    item.className = `target-item${found ? " done" : ""}`;
+    const name = found
+      ? target.word
+      : state.difficulty === "easy"
+        ? `${target.word[0]}${"•".repeat(Math.max(0, target.length - 1))}`
+        : "•".repeat(target.length);
+    const note = round.mode === "chain"
+      ? `Step ${index + 1} in the chain`
+      : round.mode === "ladder"
+        ? `${target.length} letters`
+        : round.targetDescriptor[index];
+    item.innerHTML = `
+      <div class="target-main">
+        <div class="target-name">${name}</div>
+        <div class="target-note">${note}</div>
+      </div>
+      <div class="target-points">+${target.points}</div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function renderBoard() {
+  const round = currentRound();
+  const board = $("#board");
+  board.innerHTML = "";
+  board.style.gridTemplateColumns = `repeat(${round.size}, 1fr)`;
+  round.grid.forEach((letter, index) => {
+    const cell = document.createElement("button");
+    cell.className = "cell";
+    cell.type = "button";
+    cell.dataset.index = String(index);
+    cell.textContent = letter;
+    if (state.path.includes(index)) {
+      cell.classList.add("active");
+    }
+    if (state.tracePath.includes(index)) {
+      cell.classList.add("trace");
+    }
+    board.appendChild(cell);
+  });
+  updateTrailPreview();
+}
+
+function renderTools() {
+  const round = currentRound();
+  const roundState = currentRoundState();
+  $("#hintBtn").disabled = roundState.hintsUsed >= roundState.hintLimit;
+  $("#hintBtn").textContent = `💡 Hint ${roundState.hintsUsed}/${roundState.hintLimit}`;
+  $("#traceBtn").disabled = !state.premium || roundState.completed;
+  $("#traceBtn").textContent = state.premium ? "✨ Trace a word" : "✨ Trace (Pro)";
+}
+
+function setFeedback(message, kind = "") {
+  const feedback = $("#feedback");
+  feedback.textContent = message;
+  feedback.className = `feedback${kind ? ` ${kind}` : ""}`;
+}
+
+function updateTrailPreview() {
+  if (!state.path.length) {
+    $("#trailLive").innerHTML = `<span>Drag across adjacent letters to build a trail.</span>`;
+    return;
+  }
+  const round = currentRound();
+  const letters = state.path.map((index) => round.grid[index]).join("");
+  $("#trailLive").innerHTML = `<strong>${letters}</strong>`;
+}
+
+function isAdjacent(a, b, size) {
+  const ra = Math.floor(a / size);
+  const ca = a % size;
+  const rb = Math.floor(b / size);
+  const cb = b % size;
+  return Math.abs(ra - rb) <= 1 && Math.abs(ca - cb) <= 1 && !(ra === rb && ca === cb);
+}
+
+function boardIndexFromEvent(event) {
+  const element = document.elementFromPoint(event.clientX, event.clientY);
+  if (!element) return null;
+  const cell = element.closest(".cell");
+  if (!cell) return null;
+  return Number(cell.dataset.index);
+}
+
+function clearPath() {
+  state.dragging = false;
+  state.path = [];
+  renderBoard();
+}
+
+function finishPath() {
+  state.dragging = false;
+  if (!state.path.length) return;
+  const round = currentRound();
+  const roundState = currentRoundState();
+  const match = evaluatePath(round, state.path, roundState);
+  if (match.status === "miss") {
+    setFeedback("That trail doesn't match a scoring word in this round.", "bad");
+    clearPath();
+    return;
+  }
+  if (match.status === "blocked") {
+    setFeedback(match.reason, "bad");
+    clearPath();
+    return;
+  }
+  const elapsed = Math.floor((Date.now() - state.roundStartedAt) / 1000);
+  state.roundStates[round.id] = applyWordFound(round, roundState, match, elapsed);
+  const scoreDelta = match.status === "target" ? match.target.points : match.bonus.points;
+  state.tracePath = [];
+  renderGame();
+  setFeedback(
+    match.status === "bonus"
+      ? `Hidden bonus found: ${match.word} (+${scoreDelta})`
+      : `${match.word} locked in (+${scoreDelta})`,
+    "good",
+  );
+  persistActiveSession();
+  clearPath();
+  if (state.roundStates[round.id].completed) {
+    setTimeout(showRoundResult, 260);
+  }
+}
+
+function onPointerDown(event) {
+  const index = boardIndexFromEvent(event);
+  if (index === null) return;
+  state.dragging = true;
+  state.path = [index];
+  state.tracePath = [];
+  setFeedback("");
+  renderBoard();
+}
+
+function onPointerMove(event) {
+  if (!state.dragging) return;
+  const index = boardIndexFromEvent(event);
+  if (index === null) return;
+  const round = currentRound();
+  const last = state.path[state.path.length - 1];
+  if (index === last) return;
+  if (state.path.length > 1 && state.path[state.path.length - 2] === index) {
+    state.path.pop();
+    renderBoard();
+    return;
+  }
+  if (state.path.includes(index)) return;
+  if (!isAdjacent(last, index, round.size)) return;
+  state.path.push(index);
+  renderBoard();
+}
+
+function showRoundResult() {
+  const round = currentRound();
+  const roundState = currentRoundState();
+  stopTimer();
+  $("#resultEmoji").textContent = roundState.speedBonus > 0 ? "⚡" : "🌟";
+  $("#resultTitle").textContent = `${round.title} cleared`;
+  $("#resultCopy").textContent = `You found ${roundState.foundWordIds.length}/${round.targets.length} targets in ${formatTime(roundState.finishedInSec || 0)}.`;
+  $("#resultScore").textContent = `${roundState.score} pts`;
+  const badges = [];
+  badges.push(`<span class="badge green">Targets ${roundState.foundWordIds.length}/${round.targets.length}</span>`);
+  badges.push(`<span class="badge">Hints ${roundState.hintsUsed}</span>`);
+  if (roundState.bonusWordIds.length) {
+    badges.push(`<span class="badge gold">Bonus word found</span>`);
+  }
+  if (roundState.speedBonus > 0) {
+    badges.push(`<span class="badge gold">Speed +20</span>`);
+  }
+  $("#resultBadges").innerHTML = badges.join("");
+  $("#nextRoundBtn").textContent =
+    state.currentRoundIndex === state.session.rounds.length - 1 ? "See Results" : "Next Round";
+  switchScreen("roundResultScreen");
+}
+
+function advanceRound() {
+  if (state.currentRoundIndex >= state.session.rounds.length - 1) {
+    finishSession();
+    return;
+  }
+  state.currentRoundIndex += 1;
+  persistActiveSession();
+  syncHud();
+  showRoundIntro();
+}
+
+function finishSession() {
+  const summary = summarizeSession(state.session, state.roundStates);
+  const streak = updateStreak(
+    state.store.lastCompletedDate,
+    state.selectedDate,
+    state.store.streakCurrent,
+  );
+  state.store.streakCurrent = streak.current;
+  state.store.streakBest = Math.max(state.store.streakBest, streak.current);
+  state.store.lastCompletedDate = state.selectedDate;
+  state.store.sessionsCompleted += 1;
+  state.store.totalScore += summary.totalScore;
+  state.store.bestScore = Math.max(state.store.bestScore, summary.totalScore);
+  state.store.speedRounds += summary.speedRounds;
+  state.store.completedDates[state.selectedDate] = true;
+  state.store.history[state.selectedDate] = {
+    difficulty: state.difficulty,
+    totalScore: summary.totalScore,
+    rounds: summary.rounds,
+  };
+  state.store.activeSession = null;
+  saveStore();
+  renderEnd(summary);
+  syncHud();
+  switchScreen("endScreen");
+}
+
+function renderEnd(summary) {
+  $("#endEmoji").textContent = summary.totalScore >= 260 ? "🏆" : summary.totalScore >= 180 ? "🌟" : "🛤️";
+  $("#endTitle").textContent = summary.totalScore >= 260 ? "Trailblazer" : "Daily Workout Done";
+  $("#endCopy").textContent = `${DIFFICULTY_RULES[state.difficulty].label} · ${state.selectedDate} · Everyone played the same seeded path today.`;
+  $("#endScore").textContent = summary.totalScore;
+  $("#endPerfect").textContent = `${summary.perfectRounds}/4`;
+  $("#endSpeed").textContent = `${summary.speedRounds}/4`;
+  $("#endBonus").textContent = `${summary.bonusRounds}/4`;
+  $("#roundSummaryList").innerHTML = summary.rounds.map((round) => {
+    return `
+      <div class="round-summary">
+        <div>
+          <strong>${round.title}</strong>
+          <span>${round.theme} · ${round.found}/${round.total} targets${round.bonusFound ? " · bonus found" : ""} · ${formatTime(round.finishedInSec || 0)}</span>
+        </div>
+        <b>${round.score}</b>
+      </div>
+    `;
+  }).join("");
+}
+
+function shareResults() {
+  const summary = summarizeSession(state.session, state.roundStates);
+  const text = [
+    `I scored ${summary.totalScore} on Word Trail.`,
+    `${DIFFICULTY_RULES[state.difficulty].label} · ${state.selectedDate}`,
+    `Cleared ${summary.perfectRounds}/4 rounds, found bonuses in ${summary.bonusRounds}/4, and hit ${summary.speedRounds} speed bonuses.`,
+    "Try the daily trail at puzzleperch.com 🦉",
+  ].join("\n");
+  if (navigator.share) {
+    navigator.share({ title: "Word Trail", text }).catch(() => {});
+    return;
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    showModal({
+      emoji: "📋",
+      title: "Copied!",
+      text: "Your Word Trail result summary is on the clipboard.",
+    });
+  }).catch(() => {});
+}
+
+function useHint() {
+  const round = currentRound();
+  const roundState = currentRoundState();
+  const hint = revealHint(round, roundState);
+  if (!hint) {
+    setFeedback("No basic hints left for this round.", "bad");
+    return;
+  }
+  state.roundStates[round.id] = applyHint(roundState);
+  renderTools();
+  setFeedback(hint.message, "good");
+  persistActiveSession();
+}
+
+function useTrace() {
+  if (!state.premium) {
+    showModal({
+      emoji: "✨",
+      title: "Trace is Pro",
+      text: "PuzzlePerch Pro adds path reveal tools, archive access, and the full hard-mode workout.",
+    });
+    return;
+  }
+  const round = currentRound();
+  const roundState = currentRoundState();
+  const next = round.targets.find((item) => !roundState.foundWordIds.includes(item.id));
+  if (!next) {
+    setFeedback("Everything required is already solved here.", "good");
+    return;
+  }
+  state.tracePath = next.path.slice();
+  renderBoard();
+  setFeedback("Trace preview active for the next target.", "good");
+}
+
+function attachBoardEvents() {
+  const board = $("#board");
+  board.addEventListener("pointerdown", onPointerDown);
+  board.addEventListener("pointermove", onPointerMove);
+  board.addEventListener("pointerup", finishPath);
+  board.addEventListener("pointerleave", (event) => {
+    if (state.dragging && event.buttons === 0) {
+      finishPath();
+    }
+  });
+}
+
+function bindEvents() {
+  $("#startBtn").addEventListener("click", startSession);
+  $("#continueBtn").addEventListener("click", restoreSession);
+  $("#startRoundBtn").addEventListener("click", startRound);
+  $("#nextRoundBtn").addEventListener("click", advanceRound);
+  $("#playAgainBtn").addEventListener("click", () => {
+    state.session = null;
+    state.roundStates = {};
+    state.currentRoundIndex = 0;
+    state.tracePath = [];
+    clearPath();
+    stopTimer();
+    syncHud();
+    renderChooser();
+    switchScreen("chooseScreen");
+  });
+  $("#shareBtn").addEventListener("click", shareResults);
+  $("#hintBtn").addEventListener("click", useHint);
+  $("#traceBtn").addEventListener("click", useTrace);
+  $("#clearBtn").addEventListener("click", clearPath);
+  $("#dateInput").addEventListener("change", (event) => {
+    const next = event.target.value || TODAY;
+    if (!state.premium && next !== TODAY) {
+      event.target.value = TODAY;
+      showModal({
+        emoji: "🗓️",
+        title: "Archive is Pro",
+        text: "Free play is locked to today's seeded trail. Use Pro test unlock to browse the archive.",
+      });
+      return;
+    }
+    state.selectedDate = next;
+    renderChooser();
+  });
+  $("#proToggle").addEventListener("change", (event) => {
+    state.premium = event.target.checked;
+    state.store.premium = state.premium;
+    saveStore();
+    if (!state.premium && state.selectedDate !== TODAY) {
+      state.selectedDate = TODAY;
+    }
+    if (!canAccessDifficulty(state.difficulty, state.premium)) {
+      state.difficulty = "medium";
+    }
+    renderChooser();
+  });
+  $("#modalConfirm").addEventListener("click", hideModal);
+  $("#modalClose").addEventListener("click", hideModal);
+  $("#modalBack").addEventListener("click", (event) => {
+    if (event.target.id === "modalBack") {
+      hideModal();
+    }
+  });
+}
+
+function init() {
+  state.premium = Boolean(state.store.premium);
+  if (!canAccessDifficulty(state.difficulty, state.premium)) {
+    state.difficulty = "medium";
+  }
+  bindEvents();
+  attachBoardEvents();
+  renderChooser();
+  syncHud();
+}
+
+init();
+</script>
+</body>
+</html>
