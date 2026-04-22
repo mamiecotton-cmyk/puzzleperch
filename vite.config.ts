@@ -12,5 +12,11 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "index.html"),
+        wordPerch: path.resolve(__dirname, "word-perch/index.html"),
+      },
+    },
   },
 });

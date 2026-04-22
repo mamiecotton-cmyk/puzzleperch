@@ -1,0 +1,187 @@
+export default function WordPerchRedesign() {
+  const categories = [
+    { name: 'Food & Drink', icon: '🍕', active: true, color: 'from-fuchsia-500 to-violet-500' },
+    { name: 'Animals', icon: '🐼', active: false, color: 'from-emerald-400 to-lime-400' },
+    { name: 'Places', icon: '🌍', active: false, color: 'from-sky-400 to-cyan-400' },
+    { name: 'Entertainment', icon: '🎬', active: false, color: 'from-amber-400 to-orange-400' },
+    { name: 'Music', icon: '🎵', active: false, color: 'from-pink-400 to-rose-400' },
+  ];
+
+  const subcategories = [
+    { name: 'Food', icon: '🍕', free: true },
+    { name: 'Fruits', icon: '🍎', free: false },
+    { name: 'Desserts', icon: '🍰', free: false },
+    { name: 'Fast Food', icon: '🍔', free: false },
+    { name: 'Drinks', icon: '🥤', free: false },
+    { name: 'World Cuisine', icon: '🍜', free: true },
+  ];
+
+  const difficulty = [
+    { name: 'Easy', icon: '🌱', desc: 'Relaxed warm-up', accent: 'from-emerald-400/30 to-lime-300/20' },
+    { name: 'Medium', icon: '🔥', desc: 'Smart pressure', accent: 'from-amber-400/30 to-orange-300/20' },
+    { name: 'Hard', icon: '💎', desc: 'Brutally satisfying', accent: 'from-sky-400/30 to-violet-300/20' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#07111f] text-white overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(142,97,255,0.25),transparent_28%),radial-gradient(circle_at_top_right,rgba(0,214,201,0.18),transparent_22%),radial-gradient(circle_at_bottom_left,rgba(160,255,96,0.13),transparent_24%)]" />
+      <div className="relative mx-auto max-w-7xl px-6 py-6">
+        <header className="mb-6 flex items-center justify-between rounded-full border border-white/10 bg-white/5 px-5 py-3 backdrop-blur-xl">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-fuchsia-500 to-violet-500 shadow-lg shadow-violet-900/40">🦉</div>
+            <div>
+              <div className="text-xl font-black tracking-tight">PuzzlePerch</div>
+              <div className="text-xs text-white/55">WordPerch • Daily brain sprint</div>
+            </div>
+          </div>
+          <div className="hidden items-center gap-3 md:flex">
+            <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70">⚡ 1,280 points</div>
+            <div className="rounded-full border border-orange-400/20 bg-orange-400/10 px-4 py-2 text-sm text-orange-200">🔥 2-day streak</div>
+            <button className="rounded-full bg-gradient-to-r from-fuchsia-500 to-orange-400 px-5 py-2.5 text-sm font-bold shadow-lg shadow-fuchsia-900/40">Play</button>
+          </div>
+        </header>
+
+        <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/20 backdrop-blur-xl">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-violet-300/20 bg-violet-400/10 px-3 py-1 text-sm text-violet-200">
+              <span>🧠</span>
+              <span>Fresh AI-generated word puzzles every day</span>
+            </div>
+            <h1 className="max-w-3xl text-5xl font-black leading-[0.95] tracking-tight md:text-7xl">
+              Build speed.
+              <span className="block bg-gradient-to-r from-violet-300 via-fuchsia-300 to-orange-300 bg-clip-text text-transparent">
+                Sharpen recall.
+              </span>
+              <span className="block text-white/90">Own the board.</span>
+            </h1>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-white/70">
+              WordPerch should feel less like a static settings screen and more like an event. Give players momentum, energy, and a reason to come back tomorrow.
+            </p>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              {difficulty.map((item) => (
+                <button
+                  key={item.name}
+                  className={`group rounded-[1.75rem] border border-white/10 bg-gradient-to-br ${item.accent} p-[1px] text-left transition hover:-translate-y-1`}
+                >
+                  <div className="rounded-[1.65rem] bg-[#0c1728]/95 p-5">
+                    <div className="mb-4 flex items-center justify-between">
+                      <span className="text-3xl">{item.icon}</span>
+                      <span className="rounded-full bg-white/8 px-3 py-1 text-xs uppercase tracking-[0.18em] text-white/45 group-hover:text-white/70">Mode</span>
+                    </div>
+                    <div className="text-2xl font-extrabold">{item.name}</div>
+                    <div className="mt-1 text-sm text-white/60">{item.desc}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <aside className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-violet-500/20 to-cyan-400/10 p-6 backdrop-blur-xl">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-sm uppercase tracking-[0.25em] text-white/45">Today's perch</div>
+                <div className="mt-2 text-3xl font-black">Daily Challenge</div>
+              </div>
+              <div className="rounded-2xl bg-white/10 px-3 py-2 text-2xl">🏆</div>
+            </div>
+            <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-[#0b1626]/90 p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-lg font-bold">Logic + vocab mashup</div>
+                  <div className="text-sm text-white/55">Finish in under 3:00</div>
+                </div>
+                <div className="rounded-full bg-cyan-400/15 px-3 py-1 text-xs font-semibold text-cyan-200">Medium</div>
+              </div>
+              <div className="mt-5 h-3 overflow-hidden rounded-full bg-white/8">
+                <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-fuchsia-500 via-violet-400 to-cyan-300" />
+              </div>
+              <div className="mt-2 flex justify-between text-sm text-white/55">
+                <span>67% friends beat it</span>
+                <span>3 min avg</span>
+              </div>
+              <button className="mt-6 w-full rounded-2xl bg-gradient-to-r from-fuchsia-500 to-orange-400 px-5 py-4 text-lg font-extrabold shadow-xl shadow-fuchsia-900/35">
+                Start Challenge
+              </button>
+            </div>
+
+            <div className="mt-5 grid grid-cols-3 gap-3 text-center">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                <div className="text-xs text-white/45">Best</div>
+                <div className="mt-1 text-lg font-black">80</div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                <div className="text-xs text-white/45">Streak</div>
+                <div className="mt-1 text-lg font-black">2 days</div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                <div className="text-xs text-white/45">Rank</div>
+                <div className="mt-1 text-lg font-black">Top 18%</div>
+              </div>
+            </div>
+          </aside>
+        </section>
+
+        <section className="mt-8 grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
+          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <div className="text-sm uppercase tracking-[0.22em] text-white/45">Browse worlds</div>
+                <h2 className="mt-1 text-2xl font-black">Pick your category</h2>
+              </div>
+              <div className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200">
+                Free + Pro mixed intelligently
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              {categories.map((item) => (
+                <button
+                  key={item.name}
+                  className={item.active
+                    ? `rounded-full bg-gradient-to-r ${item.color} px-5 py-3 text-sm font-bold shadow-lg`
+                    : 'rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white/70 hover:bg-white/10'}
+                >
+                  <span className="mr-2">{item.icon}</span>
+                  {item.name}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+              {subcategories.map((item) => (
+                <button key={item.name} className="group rounded-[1.5rem] border border-white/10 bg-[#0b1626]/85 p-4 text-left transition hover:-translate-y-1 hover:border-violet-300/40 hover:bg-[#0e1b2f]">
+                  <div className="mb-6 flex items-start justify-between">
+                    <div className="text-3xl">{item.icon}</div>
+                    <span className={item.free ? 'rounded-full bg-lime-400/15 px-2.5 py-1 text-xs font-bold text-lime-200' : 'rounded-full bg-amber-400/15 px-2.5 py-1 text-xs font-bold text-amber-200'}>
+                      {item.free ? 'FREE' : 'PRO'}
+                    </span>
+                  </div>
+                  <div className="text-lg font-extrabold">{item.name}</div>
+                  <div className="mt-1 text-sm text-white/50">Fast round • 3–5 min</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+            <div className="text-sm uppercase tracking-[0.22em] text-white/45">Why it hits harder</div>
+            <h3 className="mt-1 text-2xl font-black">More original than "clean but generic"</h3>
+            <div className="mt-5 space-y-4">
+              {[
+                'A game-select screen that feels like a destination, not a form.',
+                'Color and lighting build personality without copying Lumosity\'s polished-flat look.',
+                'Challenge, streak, and category choices are visible at once, so the page has momentum.',
+                'The player immediately sees why they should tap now.'
+              ].map((point) => (
+                <div key={point} className="rounded-2xl border border-white/10 bg-[#0b1626]/90 p-4 text-sm leading-7 text-white/75">
+                  {point}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
