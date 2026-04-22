@@ -1,26 +1,79 @@
+import { useState } from 'react';
+
+const TAB_GROUPS = [
+  { id: 'food',      label: 'Food & Drink',    icon: '🍕', color: 'from-fuchsia-500 to-violet-500', cats: [
+    { name: 'Food',        icon: '🍕', free: true  },
+    { name: 'Fruits',      icon: '🍎', free: false },
+    { name: 'Desserts',    icon: '🍰', free: false },
+    { name: 'Fast Food',   icon: '🍔', free: false },
+    { name: 'Drinks',      icon: '🥤', free: false },
+  ]},
+  { id: 'animals',   label: 'Animals & Nature', icon: '🐼', color: 'from-emerald-400 to-lime-400', cats: [
+    { name: 'Animals',     icon: '🐼', free: true  },
+    { name: 'Ocean',       icon: '🐠', free: false },
+    { name: 'Birds',       icon: '🦅', free: false },
+    { name: 'Insects',     icon: '🐝', free: false },
+    { name: 'Dinosaurs',   icon: '🦖', free: false },
+    { name: 'Plants',      icon: '🌿', free: false },
+  ]},
+  { id: 'places',    label: 'Places',           icon: '🌍', color: 'from-sky-400 to-cyan-400', cats: [
+    { name: 'Countries',   icon: '🌍', free: true  },
+    { name: 'Capitals',    icon: '🏛️', free: false },
+    { name: 'US States',   icon: '🇺🇸', free: false },
+    { name: 'Cities',      icon: '🌆', free: false },
+    { name: 'Landmarks',   icon: '🗽', free: false },
+  ]},
+  { id: 'ent',       label: 'Entertainment',    icon: '🎬', color: 'from-amber-400 to-orange-400', cats: [
+    { name: 'Movies',      icon: '🎬', free: true  },
+    { name: 'TV Shows',    icon: '📺', free: false },
+    { name: 'Cartoons',    icon: '🎨', free: false },
+    { name: 'Superheroes', icon: '🦸', free: false },
+    { name: 'Disney',      icon: '🏰', free: false },
+    { name: 'Video Games', icon: '🎮', free: false },
+  ]},
+  { id: 'music',     label: 'Music & Arts',     icon: '🎤', color: 'from-pink-400 to-rose-400', cats: [
+    { name: 'Music',       icon: '🎤', free: true  },
+    { name: 'Bands',       icon: '🎸', free: false },
+    { name: 'Instruments', icon: '🎹', free: false },
+    { name: 'Books',       icon: '📚', free: false },
+    { name: 'Authors',     icon: '✍️', free: false },
+    { name: 'Art',         icon: '🖼️', free: false },
+    { name: 'Fashion',     icon: '👗', free: false },
+  ]},
+  { id: 'sports',    label: 'Sports & Body',    icon: '⚽', color: 'from-lime-400 to-green-500', cats: [
+    { name: 'Sports',      icon: '⚽', free: true  },
+    { name: 'Olympics',    icon: '🏅', free: false },
+    { name: 'Athletes',    icon: '🏃', free: false },
+    { name: 'Human Body',  icon: '🫀', free: false },
+  ]},
+  { id: 'knowledge', label: 'Knowledge',        icon: '🧠', color: 'from-violet-400 to-indigo-500', cats: [
+    { name: 'Science',     icon: '🔬', free: true  },
+    { name: 'Space',       icon: '🚀', free: false },
+    { name: 'Inventions',  icon: '💡', free: false },
+    { name: 'History',     icon: '📜', free: false },
+    { name: 'Mythology',   icon: '⚡', free: false },
+  ]},
+  { id: 'life',      label: 'Everyday Life',    icon: '🎉', color: 'from-teal-400 to-cyan-500', cats: [
+    { name: 'Jobs',        icon: '💼', free: true  },
+    { name: 'Hobbies',     icon: '🎯', free: false },
+    { name: 'Holidays',    icon: '🎄', free: false },
+    { name: 'Colors',      icon: '🎨', free: false },
+    { name: 'Toys',        icon: '🧸', free: false },
+    { name: 'Vehicles',    icon: '🚗', free: false },
+    { name: 'Weather',     icon: '⛅', free: false },
+    { name: 'Technology',  icon: '💻', free: false },
+  ]},
+];
+
+const difficulty = [
+  { name: 'Easy',   icon: '🌱', desc: 'Relaxed warm-up',     accent: 'from-emerald-400/30 to-lime-300/20'   },
+  { name: 'Medium', icon: '🔥', desc: 'Smart pressure',      accent: 'from-amber-400/30 to-orange-300/20'   },
+  { name: 'Hard',   icon: '💎', desc: 'Brutally satisfying', accent: 'from-sky-400/30 to-violet-300/20'     },
+];
+
 export default function WordPerchRedesign() {
-  const categories = [
-    { name: 'Food & Drink', icon: '🍕', active: true, color: 'from-fuchsia-500 to-violet-500' },
-    { name: 'Animals', icon: '🐼', active: false, color: 'from-emerald-400 to-lime-400' },
-    { name: 'Places', icon: '🌍', active: false, color: 'from-sky-400 to-cyan-400' },
-    { name: 'Entertainment', icon: '🎬', active: false, color: 'from-amber-400 to-orange-400' },
-    { name: 'Music', icon: '🎵', active: false, color: 'from-pink-400 to-rose-400' },
-  ];
-
-  const subcategories = [
-    { name: 'Food', icon: '🍕', free: true },
-    { name: 'Fruits', icon: '🍎', free: false },
-    { name: 'Desserts', icon: '🍰', free: false },
-    { name: 'Fast Food', icon: '🍔', free: false },
-    { name: 'Drinks', icon: '🥤', free: false },
-    { name: 'World Cuisine', icon: '🍜', free: true },
-  ];
-
-  const difficulty = [
-    { name: 'Easy', icon: '🌱', desc: 'Relaxed warm-up', accent: 'from-emerald-400/30 to-lime-300/20' },
-    { name: 'Medium', icon: '🔥', desc: 'Smart pressure', accent: 'from-amber-400/30 to-orange-300/20' },
-    { name: 'Hard', icon: '💎', desc: 'Brutally satisfying', accent: 'from-sky-400/30 to-violet-300/20' },
-  ];
+  const [activeTab, setActiveTab] = useState('food');
+  const activeGroup = TAB_GROUPS.find(g => g.id === activeTab)!;
 
   return (
     <div className="min-h-screen bg-[#07111f] text-white overflow-hidden">
@@ -55,7 +108,7 @@ export default function WordPerchRedesign() {
               <span className="block text-white/90">Own the board.</span>
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-white/70">
-              WordPerch should feel less like a static settings screen and more like an event. Give players momentum, energy, and a reason to come back tomorrow.
+              Pick a category and difficulty — fresh AI-generated puzzles every day!
             </p>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -129,27 +182,25 @@ export default function WordPerchRedesign() {
                 <div className="text-sm uppercase tracking-[0.22em] text-white/45">Browse worlds</div>
                 <h2 className="mt-1 text-2xl font-black">Pick your category</h2>
               </div>
-              <div className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200">
-                Free + Pro mixed intelligently
-              </div>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              {categories.map((item) => (
+              {TAB_GROUPS.map((item) => (
                 <button
-                  key={item.name}
-                  className={item.active
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={item.id === activeTab
                     ? `rounded-full bg-gradient-to-r ${item.color} px-5 py-3 text-sm font-bold shadow-lg`
                     : 'rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white/70 hover:bg-white/10'}
                 >
                   <span className="mr-2">{item.icon}</span>
-                  {item.name}
+                  {item.label}
                 </button>
               ))}
             </div>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-3 xl:grid-cols-6">
-              {subcategories.map((item) => (
+            <div className="mt-5 grid gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
+              {activeGroup.cats.map((item) => (
                 <button key={item.name} className="group rounded-[1.5rem] border border-white/10 bg-[#0b1626]/85 p-4 text-left transition hover:-translate-y-1 hover:border-violet-300/40 hover:bg-[#0e1b2f]">
                   <div className="mb-6 flex items-start justify-between">
                     <div className="text-3xl">{item.icon}</div>
