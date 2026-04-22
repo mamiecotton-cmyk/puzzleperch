@@ -171,7 +171,7 @@ function App() {
           <div className="game-cards">
 
             {/* Word Perch */}
-            <a className="game-card game-card--word" href="/word-perch.html">
+            <a className="game-card game-card--word" href="/word-perch/">
               <div className="game-card-header">
                 <span className="game-card-title">Word Perch</span>
                 <span className="game-card-badge badge-new">NEW</span>
