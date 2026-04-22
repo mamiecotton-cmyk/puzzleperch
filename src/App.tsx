@@ -237,13 +237,11 @@ function App() {
               <span>🛤️</span>
               <span className="trail-bubble">🔤</span>
             </div>
-            <div className="card-meta trail-desc">
-              Four seeded rounds of swipeable word paths
+            <div className="card-meta">
+              Daily · 5 min <span className="star">⭐</span> 4.9
             </div>
             <div className="card-tags">
-              <span className="tag new">New</span>
               <span className="tag">Word Paths</span>
-              <span className="tag">Daily Seed</span>
             </div>
             <div className="badge-bottom badge-trail">Follow the Letters!</div>
           </a>

@@ -408,9 +408,11 @@ export function buildRoundState(round, premium = false, difficulty = "easy") {
     foundWordIds: [],
     bonusWordIds: [],
     score: 0,
+    targetsComplete: false,
     completed: false,
     speedBonus: 0,
     finishedInSec: null,
+    targetsCompletedAtSec: null,
     hintsUsed: 0,
     hintLimit: premium
       ? DIFFICULTY_RULES[difficulty].hintLimits.premium
@@ -457,13 +459,30 @@ export function applyWordFound(round, roundState, match, elapsedSec) {
   }
 
   const allTargetsFound = next.foundWordIds.length === round.targets.length;
-  if (allTargetsFound && !next.completed) {
-    next.completed = true;
-    next.finishedInSec = elapsedSec;
+  if (allTargetsFound && !next.targetsComplete) {
+    next.targetsComplete = true;
+    next.targetsCompletedAtSec = elapsedSec;
     if (elapsedSec <= round.targetTimeSec) {
       next.speedBonus = 20;
       next.score += 20;
     }
+    if (round.hiddenBonuses.length === 0) {
+      next.completed = true;
+      next.finishedInSec = elapsedSec;
+    }
+  }
+  return next;
+}
+
+export function finalizeRound(round, roundState, elapsedSec) {
+  const next = clone(roundState);
+  if (!next.targetsComplete) {
+    return next;
+  }
+  next.completed = true;
+  next.finishedInSec = elapsedSec;
+  if (next.targetsCompletedAtSec === null) {
+    next.targetsCompletedAtSec = elapsedSec;
   }
   return next;
 }

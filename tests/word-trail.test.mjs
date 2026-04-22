@@ -8,6 +8,7 @@ import {
   canPlayDate,
   dateKeyFromDate,
   evaluatePath,
+  finalizeRound,
   generateDailySession,
   summarizeSession,
   updateStreak,
@@ -39,7 +40,7 @@ test("free players are limited to today's unplayed session", () => {
 
 test("round flow awards words and adds the 20-point speed bonus on completion", () => {
   const session = generateDailySession({ dateKey: "2026-04-21", difficulty: "easy", premium: false });
-  const round = session.rounds[0];
+  const round = session.rounds.find((item) => item.hiddenBonuses.length === 0) ?? session.rounds[0];
   let roundState = buildRoundState(round, false, "easy");
 
   for (let index = 0; index < round.targets.length; index += 1) {
@@ -52,6 +53,25 @@ test("round flow awards words and adds the 20-point speed bonus on completion", 
   assert.equal(roundState.completed, true);
   assert.equal(roundState.speedBonus, 20);
   assert.ok(roundState.score > 20);
+});
+
+test("bonus rounds stay open after required targets are solved until finalized", () => {
+  const session = generateDailySession({ dateKey: "2026-04-21", difficulty: "easy", premium: false });
+  const round = session.rounds.find((item) => item.hiddenBonuses.length > 0);
+  let roundState = buildRoundState(round, false, "easy");
+
+  for (const target of round.targets) {
+    const match = evaluatePath(round, target.path, roundState);
+    roundState = applyWordFound(round, roundState, match, 25);
+  }
+
+  assert.equal(roundState.targetsComplete, true);
+  assert.equal(roundState.completed, false);
+  assert.equal(roundState.speedBonus, 20);
+
+  roundState = finalizeRound(round, roundState, 30);
+  assert.equal(roundState.completed, true);
+  assert.equal(roundState.finishedInSec, 30);
 });
 
 test("chain rounds block out-of-order answers", () => {

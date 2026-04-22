@@ -439,14 +439,6 @@ a {
   color: var(--dark);
 }
 
-.trail-desc {
-  color: #2f6e36;
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.3;
-  padding: 0 4px;
-}
-
 .badge-trail {
   background: linear-gradient(90deg, #7acb78, #387a3b);
 }

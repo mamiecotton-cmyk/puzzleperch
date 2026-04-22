@@ -615,6 +615,12 @@
     color: var(--trail-deep);
   }
 
+  .tool.finish {
+    background: linear-gradient(135deg, var(--mint), #4fae59);
+    border-color: transparent;
+    color: #fff;
+  }
+
   .feedback {
     min-height: 22px;
     margin-top: 12px;
@@ -927,6 +933,7 @@
       <div class="tool-row">
         <button class="tool" id="hintBtn">💡 Hint</button>
         <button class="tool premium" id="traceBtn">✨ Trace</button>
+        <button class="tool finish" id="finishRoundBtn" style="display:none;">Finish Round</button>
         <button class="tool" id="clearBtn">Clear Trail</button>
       </div>
       <div class="feedback" id="feedback"></div>
@@ -995,6 +1002,7 @@ import {
   canPlayDate,
   dateKeyFromDate,
   evaluatePath,
+  finalizeRound,
   generateDailySession,
   getModeMeta,
   revealHint,
@@ -1344,6 +1352,15 @@ function renderTools() {
   $("#hintBtn").textContent = `💡 Hint ${roundState.hintsUsed}/${roundState.hintLimit}`;
   $("#traceBtn").disabled = !state.premium || roundState.completed;
   $("#traceBtn").textContent = state.premium ? "✨ Trace a word" : "✨ Trace (Pro)";
+  const finishBtn = $("#finishRoundBtn");
+  const canFinish = roundState.targetsComplete && !roundState.completed;
+  finishBtn.style.display = canFinish ? "inline-flex" : "none";
+  finishBtn.disabled = !canFinish;
+  finishBtn.textContent = roundState.bonusWordIds.length
+    ? "Finish Round ✓"
+    : round.hiddenBonuses.length
+      ? "Finish Round"
+      : "Round Cleared";
 }
 
 function setFeedback(message, kind = "") {
@@ -1408,7 +1425,9 @@ function finishPath() {
   setFeedback(
     match.status === "bonus"
       ? `Hidden bonus found: ${match.word} (+${scoreDelta})`
-      : `${match.word} locked in (+${scoreDelta})`,
+      : state.roundStates[round.id].targetsComplete && round.hiddenBonuses.length
+        ? `${match.word} locked in (+${scoreDelta}). Hidden bonus time - finish when you're ready.`
+        : `${match.word} locked in (+${scoreDelta})`,
     "good",
   );
   persistActiveSession();
@@ -1416,6 +1435,18 @@ function finishPath() {
   if (state.roundStates[round.id].completed) {
     setTimeout(showRoundResult, 260);
   }
+}
+
+function finishCurrentRound() {
+  const round = currentRound();
+  const roundState = currentRoundState();
+  if (!roundState.targetsComplete || roundState.completed) {
+    return;
+  }
+  const elapsed = Math.floor((Date.now() - state.roundStartedAt) / 1000);
+  state.roundStates[round.id] = finalizeRound(round, roundState, elapsed);
+  persistActiveSession();
+  showRoundResult();
 }
 
 function onPointerDown(event) {
@@ -1615,6 +1646,7 @@ function bindEvents() {
   $("#shareBtn").addEventListener("click", shareResults);
   $("#hintBtn").addEventListener("click", useHint);
   $("#traceBtn").addEventListener("click", useTrace);
+  $("#finishRoundBtn").addEventListener("click", finishCurrentRound);
   $("#clearBtn").addEventListener("click", clearPath);
   $("#dateInput").addEventListener("change", (event) => {
     const next = event.target.value || TODAY;
